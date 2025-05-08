@@ -1,0 +1,15 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/" # Root of the repo
+    schedule:
+      interval: "weekly"  # Or "daily"
+    allow:
+      - dependency-type: "direct"
+      - dependency-name: "expo" # Focus on Expo & SDK if you want
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    reviewers:
+      - jg03dev   # Optional: ask a team member to always review
