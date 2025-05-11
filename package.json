@@ -15,6 +15,7 @@
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
+    "dotenv": "^16.5.0",
     "expo": "^53.0.8",
     "expo-blur": "~14.1.4",
     "expo-camera": "~16.1.6",
@@ -28,6 +29,7 @@
     "expo-status-bar": "~2.2.3",
     "expo-symbols": "~0.4.4",
     "expo-system-ui": "~5.0.7",
+    "expo-video": "~2.1.8",
     "expo-web-browser": "~14.1.6",
     "react": "19.0.0",
     "react-dom": "19.0.0",
@@ -36,6 +38,7 @@
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.10.0",
+    "react-native-video": "^6.13.0",
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5"
   },
