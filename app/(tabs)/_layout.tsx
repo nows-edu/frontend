@@ -1,93 +1,148 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Dimensions, Platform, StyleSheet, View } from 'react-native';
+import { Dimensions, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { HapticTab } from '@/components/HapticTab';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+// Dimensiones y constantes
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const TAB_BAR_HEIGHT = Math.min(SCREEN_HEIGHT * 0.1, 80);
+const ICON_SIZE = Math.min(SCREEN_WIDTH * 0.07, 30);
+const CENTER_BUTTON_SIZE = Math.min(SCREEN_WIDTH * 0.16, 65);
 
-const SCREEN_HEIGHT = Dimensions.get('window').height;
-const TAB_BAR_HEIGHT = SCREEN_HEIGHT * 0.1; // 10% of screen height
+// Colores del tema
+const COLORS = {
+  gradient: {
+    dark1: 'rgba(18, 18, 18, 1)',
+    dark2: 'rgba(26, 26, 26, 1)',
+  },
+  button: {
+    primary: 'rgb(74, 119, 234)',
+    primaryTransparent: 'rgba(122, 154, 236, 0.8)',
+  },
+  icon: {
+    active: 'rgba(122, 154, 236, 1)',
+    inactive: 'rgba(153, 153, 153, 1)',
+  },
+  text: {
+    white: 'rgba(255, 255, 255, 1)',
+  }
+};
 
-const CenterButton = ({ color }: { color: string }) => (
-  <View style={[styles.centerButton, { backgroundColor: '#8B5CF6' }]}>
-    <MaterialIcons name="add" size={35} color="#fff" />
-  </View>
-);
+// Componente de fondo con gradiente
+function GradientTabBarBackground() {
+  const insets = useSafeAreaInsets();
+  return (
+    <LinearGradient
+      colors={[COLORS.gradient.dark1, COLORS.gradient.dark2]}
+      start={[0, 0]}
+      end={[0, 1]}
+      style={[styles.tabBarBg, { paddingBottom: insets.bottom }]}
+    />
+  );
+}
+
+// Botón central con gradiente
+function CenterButton({ focused }: { focused: boolean }) {
+  return (
+    <View style={styles.centerButtonWrapper}>
+      <LinearGradient
+        colors={[COLORS.button.primary, COLORS.button.primary]}
+        style={styles.centerButton}
+      >
+        <MaterialIcons 
+          name="add" 
+          size={CENTER_BUTTON_SIZE * 0.5} 
+          color={COLORS.text.white} 
+        />
+      </LinearGradient>
+    </View>
+  );
+}
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+      screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
         tabBarShowLabel: false,
-        tabBarStyle: {
-          height: TAB_BAR_HEIGHT,
-          ...Platform.select({
-            ios: {
-              position: 'absolute',
-            },
-            default: {},
-          }),
+        tabBarStyle: styles.tabBar,
+        tabBarBackground: () => <GradientTabBarBackground />,
+        tabBarIcon: ({ focused }) => {
+          let iconName: keyof typeof MaterialIcons.glyphMap;
+          switch (route.name) {
+            case 'index': iconName = 'home'; break;
+            case 'community': iconName = 'chat'; break;
+            case 'create': return <CenterButton focused={focused} />;
+            case 'gifts': iconName = 'apps'; break;
+            case 'explore': iconName = 'person'; break;
+            default: iconName = 'circle';
+          }
+          return (
+            <View style={styles.iconWrapper}>
+              <MaterialIcons
+                name={iconName}
+                size={ICON_SIZE}
+                color={focused ? COLORS.icon.active : COLORS.icon.inactive}
+                style={styles.icon}
+              />
+            </View>
+          );
         },
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          tabBarIcon: ({ color }) => <MaterialIcons name="home" size={32} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="community"
-        options={{
-          tabBarIcon: ({ color }) => <MaterialIcons name="people" size={32} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="create"
-        options={{
-          tabBarIcon: ({ color }) => <CenterButton color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="gifts"
-        options={{
-          tabBarIcon: ({ color }) => <MaterialIcons name="card-giftcard" size={32} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          tabBarIcon: ({ color }) => <MaterialIcons name="person" size={32} color={color} />,
-        }}
-      />
+      })}
+    >
+      <Tabs.Screen name="index" />
+      <Tabs.Screen name="community" />
+      <Tabs.Screen name="create" />
+      <Tabs.Screen name="gifts" />
+      <Tabs.Screen name="explore" />
     </Tabs>
   );
 }
 
 const styles = StyleSheet.create({
+  tabBar: {
+    height: TAB_BAR_HEIGHT,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    borderTopLeftRadius: Math.min(SCREEN_WIDTH * 0.03, 24),
+    borderTopRightRadius: Math.min(SCREEN_WIDTH * 0.03, 24),
+    backgroundColor: 'transparent',
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  tabBarBg: {
+    flex: 1,
+    borderTopLeftRadius: Math.min(SCREEN_WIDTH * 0.03, 24),
+    borderTopRightRadius: Math.min(SCREEN_WIDTH * 0.03, 24),
+  },
+  centerButtonWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: -CENTER_BUTTON_SIZE * 0.01,
+  },
   centerButton: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: '#8B5CF6',
+    width: CENTER_BUTTON_SIZE,
+    height: CENTER_BUTTON_SIZE,
+    borderRadius: CENTER_BUTTON_SIZE / 2,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: TAB_BAR_HEIGHT * 0.5,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 8,
+  },
+  iconWrapper: {
+    height: TAB_BAR_HEIGHT * 0.9,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: TAB_BAR_HEIGHT * 0.05,
+  },
+  icon: {
+    marginTop: TAB_BAR_HEIGHT * 0.25,
   },
 });
