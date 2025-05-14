@@ -1,127 +1,75 @@
-import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Video, { VideoRef } from 'react-native-video';
-import { getVerticalVideo } from '../../utils/pexelsApi';
+import { Image } from 'expo-image';
+import { Platform, StyleSheet } from 'react-native';
 
-export default function App() {
-  const videoRef = useRef<VideoRef>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [videoUri, setVideoUri] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+import { HelloWave } from '@/components/HelloWave';
+import ParallaxScrollView from '@/components/ParallaxScrollView';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
 
-  useEffect(() => {
-    loadVideo();
-  }, []);
-
-  const loadVideo = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const uri = await getVerticalVideo();
-      
-      if (!uri) {
-        setError('Failed to load video. No valid video URL received.');
-        return;
-      }
-      
-      console.log('Received video URI:', uri);
-      setVideoUri(uri);
-    } catch (err) {
-      setError('Failed to load video: ' + (err instanceof Error ? err.message : String(err)));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handlePlayback = () => {
-    setIsPlaying(!isPlaying);
-  };
-
-  const handleVideoError = (error: any) => {
-    console.error('Video playback error:', error);
-    setError(`Video playback error: ${error.error.errorString}`);
-  };
-
-  if (isLoading) {
-    return (
-      <View style={[styles.container, styles.centered]}>
-        <ActivityIndicator size="large" color="#ffffff" />
-        <Text style={styles.text}>Loading video...</Text>
-      </View>
-    );
-  }
-
-  if (error || !videoUri) {
-    return (
-      <View style={[styles.container, styles.centered]}>
-        <Text style={styles.errorText}>{error || 'No video available'}</Text>
-        <TouchableOpacity style={styles.button} onPress={loadVideo}>
-          <Text style={styles.text}>Retry</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
+export default function HomeScreen() {
   return (
-    <View style={styles.container}>
-      <Video
-        ref={videoRef}
-        source={{ uri: videoUri }}
-        style={styles.video}
-        resizeMode="cover"
-        repeat
-        paused={!isPlaying}
-        onError={handleVideoError}
-      />
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handlePlayback}
-        >
-          <Text style={styles.text}>
-            {isPlaying ? 'Pause' : 'Play'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    <ParallaxScrollView
+      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
+      headerImage={
+        <Image
+          source={require('@/assets/images/partial-react-logo.png')}
+          style={styles.reactLogo}
+        />
+      }>
+      <ThemedView style={styles.titleContainer}>
+        <ThemedText type="title">Welcome!</ThemedText>
+        <HelloWave />
+      </ThemedView>
+      <ThemedView style={styles.stepContainer}>
+        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
+        <ThemedText>
+          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
+          Press{' '}
+          <ThemedText type="defaultSemiBold">
+            {Platform.select({
+              ios: 'cmd + d',
+              android: 'cmd + m',
+              web: 'F12',
+            })}
+          </ThemedText>{' '}
+          to open developer tools.
+        </ThemedText>
+      </ThemedView>
+      <ThemedView style={styles.stepContainer}>
+        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
+        <ThemedText>
+          {`Tap the Explore tab to learn more about what's included in this starter app.`}
+        </ThemedText>
+      </ThemedView>
+      <ThemedView style={styles.stepContainer}>
+        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
+        <ThemedText>
+          {`When you're ready, run `}
+          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
+          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
+          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
+          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
+        </ThemedText>
+      </ThemedView>
+    </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'black',
-  },
-  centered: {
-    justifyContent: 'center',
+  titleContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
   },
-  video: {
-    flex: 1,
-    alignSelf: 'stretch'
+  stepContainer: {
+    gap: 8,
+    marginBottom: 8,
   },
-  buttonContainer: {
+  reactLogo: {
+    height: 178,
+    width: 290,
+    bottom: 0,
+    left: 0,
     position: 'absolute',
-    bottom: 20,
-    width: '100%',
-    alignItems: 'center',
-  },
-  button: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    padding: 10,
-    borderRadius: 8,
-  },
-  text: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  errorText: {
-    color: '#ff4444',
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: 'center',
-    paddingHorizontal: 20,
   },
 });
