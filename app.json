@@ -44,9 +44,7 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ],
-      "expo-video",
-      "react-native-video"
+      ]
     ],
     "experiments": {
       "typedRoutes": true
