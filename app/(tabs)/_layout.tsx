@@ -72,11 +72,11 @@ export default function TabLayout() {
         tabBarIcon: ({ focused }) => {
           let iconName: keyof typeof MaterialIcons.glyphMap;
           switch (route.name) {
-            case 'index': iconName = 'home'; break;
-            case 'community': iconName = 'chat'; break;
-            case 'create': return <CenterButton focused={focused} />;
-            case 'gifts': iconName = 'apps'; break;
-            case 'explore': iconName = 'person'; break;
+            case 'home': iconName = 'home'; break;
+            case 'experiences': iconName = 'apps'; break;
+            case 'explore': return <CenterButton focused={focused} />;
+            case 'chat': iconName = 'chat'; break;
+            case 'profile': iconName = 'person'; break;
             default: iconName = 'circle';
           }
           return (
@@ -92,11 +92,11 @@ export default function TabLayout() {
         },
       })}
     >
-      <Tabs.Screen name="index" />
-      <Tabs.Screen name="community" />
-      <Tabs.Screen name="create" />
-      <Tabs.Screen name="gifts" />
+      <Tabs.Screen name="home" />
+      <Tabs.Screen name="experiences" />
       <Tabs.Screen name="explore" />
+      <Tabs.Screen name="chat" />
+      <Tabs.Screen name="profile" />
     </Tabs>
   );
 }
