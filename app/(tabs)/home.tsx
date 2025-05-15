@@ -1,6 +1,6 @@
-import TopBar from '@/components/Home/TopBar';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import TopBar from '../../components/Home/TopBar';
 
 // Simulated API functions
 const fetchCategoriesFromAPI = async () => {
