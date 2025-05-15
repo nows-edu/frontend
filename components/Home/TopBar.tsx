@@ -1,10 +1,23 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { Href, router } from 'expo-router';
 import React, { useState } from 'react';
 import { ActivityIndicator, Dimensions, Platform, Text as RNText, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { IconButton, Text } from 'react-native-paper';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+// Helper function to ensure consistent navigation
+const navigateTo = (path: Href) => {
+  try {
+    router.push(path);
+  } catch (error) {
+    console.error('Navigation error:', error);
+    // Fallback navigation
+    setTimeout(() => {
+      router.navigate(path);
+    }, 0);
+  }
+};
 
 /**
  * TopBar component — responsive across devices
@@ -14,8 +27,8 @@ export default function TopBar({
   filterOptions = [] as string[],
   selectedOptions = [] as string[],
   onOptionToggle = (_: any) => {},
-  onSearchPress = () => router.push('/search'),
-  onNotificationsPress = () => router.push('/notifications'),
+  onSearchPress = () => navigateTo('/search'),
+  onNotificationsPress = () => navigateTo('/notifications'),
   isUpdating = false,
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -38,7 +51,7 @@ export default function TopBar({
           <View style={styles.rightContainer}>
             <TouchableOpacity 
               style={styles.pointsContainer}
-              onPress={() => router.push('/game')}
+              onPress={() => navigateTo('/game')}
             >
               <Ionicons name="bonfire" size={20} color="#007AFF" />
               <Text style={styles.pointsText}>{points}</Text>
@@ -48,14 +61,14 @@ export default function TopBar({
               icon="magnify"
               iconColor="white"
               size={24}
-              onPress={() => router.push('/search')}
+              onPress={onSearchPress}
             />
             <IconButton
               style={styles.icon}
               icon="bell-outline"
               iconColor="white"
               size={24}
-              onPress={() => router.push('/notifications')}
+              onPress={onNotificationsPress}
             />
           </View>
         </View>

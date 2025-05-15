@@ -73,14 +73,6 @@ export default function HomeScreen() {
     }
   };
 
-  const handleSearchPress = () => {
-    console.log('Búsqueda presionada');
-  };
-
-  const handleNotificationsPress = () => {
-    console.log('Notificaciones presionadas');
-  };
-
   return (
     <View style={styles.container}>
       {isLoading ? (
@@ -93,8 +85,6 @@ export default function HomeScreen() {
           filterOptions={filterOptions}
           selectedOptions={selectedOptions}
           onOptionToggle={handleOptionToggle}
-          onSearchPress={handleSearchPress}
-          onNotificationsPress={handleNotificationsPress}
           isUpdating={isUpdating}
         />
       )}
