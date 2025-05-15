@@ -1,13 +1,76 @@
 import TopBar from '@/components/Home/TopBar';
-import { StyleSheet } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+
+// Simulated API functions
+const fetchCategoriesFromAPI = async () => {
+  // Simulating API request with a delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return ['Populares', 'Nuevos', 'Cercanos', 'Favoritos', 'Tendencias', 'Recomendados'];
+};
+
+const fetchSelectedCategoriesFromAPI = async () => {
+  // Simulating API request with a delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  return ['Populares', 'Nuevos'];
+};
+
+const updateSelectedCategoriesInAPI = async (categories: string[]) => {
+  // Simulating API request with a delay
+  await new Promise(resolve => setTimeout(resolve, 700));
+  console.log('Categories updated in backend:', categories);
+  return true;
+};
 
 export default function HomeScreen() {
-  // Ejemplo de datos para el TopBar
-  const exampleFilterOptions: string[] = ['Populares', 'Nuevos', 'Cercanos', 'Favoritos'];
-  const exampleSelectedOptions: string[] = ['Populares', 'Nuevos'];
+  const [filterOptions, setFilterOptions] = useState<string[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
   
-  const handleOptionToggle = (option: string) => {
-    console.log('Opción seleccionada:', option);
+  // Load categories data on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        const [categories, selected] = await Promise.all([
+          fetchCategoriesFromAPI(),
+          fetchSelectedCategoriesFromAPI()
+        ]);
+        setFilterOptions(categories);
+        setSelectedOptions(selected);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadData();
+  }, []);
+  
+  const handleOptionToggle = async (option: string) => {
+    setIsUpdating(true);
+    
+    // Update local state immediately for better UX
+    let newSelectedOptions;
+    if (selectedOptions.includes(option)) {
+      newSelectedOptions = selectedOptions.filter(item => item !== option);
+    } else {
+      newSelectedOptions = [...selectedOptions, option];
+    }
+    setSelectedOptions(newSelectedOptions);
+    
+    try {
+      // Send update to backend
+      await updateSelectedCategoriesInAPI(newSelectedOptions);
+    } catch (error) {
+      console.error('Error updating categories:', error);
+      // Revert to previous state if API call fails
+      setSelectedOptions(selectedOptions);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const handleSearchPress = () => {
@@ -19,17 +82,33 @@ export default function HomeScreen() {
   };
 
   return (
-    <TopBar
-      points={1250}
-      filterOptions={exampleFilterOptions}
-      selectedOptions={exampleSelectedOptions}
-      onOptionToggle={handleOptionToggle}
-      onSearchPress={handleSearchPress}
-      onNotificationsPress={handleNotificationsPress}
-    />
+    <View style={styles.container}>
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#7A9AEC" />
+        </View>
+      ) : (
+        <TopBar
+          points={1250}
+          filterOptions={filterOptions}
+          selectedOptions={selectedOptions}
+          onOptionToggle={handleOptionToggle}
+          onSearchPress={handleSearchPress}
+          onNotificationsPress={handleNotificationsPress}
+          isUpdating={isUpdating}
+        />
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  // Mantener estilos vacíos por si necesitas agregar más adelante
+  container: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  }
 });

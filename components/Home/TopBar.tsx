@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { Dimensions, Platform, Text as RNText, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Dimensions, Platform, Text as RNText, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { IconButton, Text } from 'react-native-paper';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -13,8 +14,9 @@ export default function TopBar({
   filterOptions = [] as string[],
   selectedOptions = [] as string[],
   onOptionToggle = (_: any) => {},
-  onSearchPress = () => {},
-  onNotificationsPress = () => {},
+  onSearchPress = () => router.push('/search'),
+  onNotificationsPress = () => router.push('/notifications'),
+  isUpdating = false,
 }) {
   const [expanded, setExpanded] = useState(false);
   const title = 'Nows';
@@ -34,30 +36,36 @@ export default function TopBar({
           </TouchableOpacity>
 
           <View style={styles.rightContainer}>
-            <View style={styles.pointsContainer}>
+            <TouchableOpacity 
+              style={styles.pointsContainer}
+              onPress={() => router.push('/game')}
+            >
               <Ionicons name="bonfire" size={20} color="#007AFF" />
               <Text style={styles.pointsText}>{points}</Text>
-            </View>
+            </TouchableOpacity>
             <IconButton
               style={styles.icon}
               icon="magnify"
               iconColor="white"
               size={24}
-              onPress={onSearchPress}
+              onPress={() => router.push('/search')}
             />
             <IconButton
               style={styles.icon}
               icon="bell-outline"
               iconColor="white"
               size={24}
-              onPress={onNotificationsPress}
+              onPress={() => router.push('/notifications')}
             />
           </View>
         </View>
 
         {expanded && (
           <View style={styles.dropdown}>
-            <Text style={styles.subtitle}>Selecciona lo que te recomendamos:</Text>
+            <View style={styles.subtitleContainer}>
+              <Text style={styles.subtitle}>Selecciona lo que te recomendamos:</Text>
+              {isUpdating && <ActivityIndicator size="small" color="#7A9AEC" style={styles.indicator} />}
+            </View>
             <View style={styles.tagsWrapper}>
               {filterOptions.map(option => {
                 const selected = selectedOptions.includes(option);
@@ -66,9 +74,11 @@ export default function TopBar({
                     key={option}
                     style={[
                       styles.tag,
-                      selected ? styles.tagSelected : styles.tagUnselected
+                      selected ? styles.tagSelected : styles.tagUnselected,
+                      isUpdating ? { opacity: 0.7 } : {}
                     ]}
                     onPress={() => onOptionToggle(option)}
+                    disabled={isUpdating}
                   >
                     <RNText style={[
                       styles.tagText,
@@ -133,11 +143,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: SCREEN_WIDTH * 0.04,
     marginTop: SCREEN_WIDTH * 0.02,
     zIndex: 10,
-  },  subtitle: {
+  },  subtitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SCREEN_WIDTH * 0.04,
+  },
+  subtitle: {
     color: 'white',
     fontSize: SCREEN_WIDTH * 0.038,
     fontWeight: '600',
-    marginBottom: SCREEN_WIDTH * 0.04, // Más espacio después del título
+  },
+  indicator: {
+    marginLeft: SCREEN_WIDTH * 0.02,
   },  tagsWrapper: { 
     flexDirection: 'row', 
     flexWrap: 'wrap',
