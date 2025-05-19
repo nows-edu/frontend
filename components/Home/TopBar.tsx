@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Href, router } from 'expo-router';
 import React, { useState } from 'react';
-import { ActivityIndicator, Dimensions, Platform, Text as RNText, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { IconButton, Text } from 'react-native-paper';
+import { ActivityIndicator, Dimensions, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { IconButton } from 'react-native-paper';
+import Tag from '../General/Tag';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -79,29 +80,15 @@ export default function TopBar({
               <Text style={styles.subtitle}>Selecciona lo que te recomendamos:</Text>
               {isUpdating && <ActivityIndicator size="small" color="#7A9AEC" style={styles.indicator} />}
             </View>
-            <View style={styles.tagsWrapper}>
-              {filterOptions.map(option => {
-                const selected = selectedOptions.includes(option);
-                return (
-                  <TouchableOpacity
-                    key={option}
-                    style={[
-                      styles.tag,
-                      selected ? styles.tagSelected : styles.tagUnselected,
-                      isUpdating ? { opacity: 0.7 } : {}
-                    ]}
-                    onPress={() => onOptionToggle(option)}
-                    disabled={isUpdating}
-                  >
-                    <RNText style={[
-                      styles.tagText,
-                      selected ? styles.tagTextSelected : styles.tagTextUnselected
-                    ]}>
-                      {option}
-                    </RNText>
-                  </TouchableOpacity>
-                );
-              })}
+            <View style={styles.tagsWrapper}>              {filterOptions.map(option => (
+                <Tag
+                  key={option}
+                  label={option}
+                  selected={selectedOptions.includes(option)}
+                  disabled={isUpdating}
+                  onPress={() => onOptionToggle(option)}
+                />
+              ))}
             </View>
           </View>
         )}
@@ -113,13 +100,13 @@ export default function TopBar({
 const styles = StyleSheet.create({
   safeArea: { backgroundColor: 'transparent' },
   wrapper: {
-    marginHorizontal: SCREEN_WIDTH * 0.04,
+    marginHorizontal: SCREEN_WIDTH * 0.035,
     position: 'relative',
   },  container: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: SCREEN_WIDTH * 0.02,
+    paddingVertical: SCREEN_WIDTH * 0.015,
     paddingLeft: SCREEN_WIDTH * 0.04,
     paddingRight: SCREEN_WIDTH * 0.02, // Menos padding a la derecha
     backgroundColor: 'rgba(25,25,25,0.6)',
@@ -128,7 +115,7 @@ const styles = StyleSheet.create({
   titleContainer: { flexDirection: 'row', alignItems: 'center' },
   title: {
     color: 'white',
-    fontSize: SCREEN_WIDTH * 0.055,
+    fontSize: SCREEN_WIDTH * 0.05,
     fontWeight: 'bold',
     marginRight: SCREEN_WIDTH * 0.02,
   },
@@ -164,7 +151,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     color: 'white',
-    fontSize: SCREEN_WIDTH * 0.038,
+    fontSize: SCREEN_WIDTH * 0.034,
     fontWeight: '600',
   },
   indicator: {
@@ -174,30 +161,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: SCREEN_WIDTH * 0.01, // Reducido el espacio entre tags
-  },
-  tag: {
-    borderRadius: SCREEN_WIDTH * 0.06,
-    paddingHorizontal: SCREEN_WIDTH * 0.035,
-    paddingVertical: SCREEN_WIDTH * 0.015,
-    margin: SCREEN_WIDTH * 0.005, // Reducido el margen
-  },tagSelected: {
-    backgroundColor: 'rgba(122,154,236,0.2)',
-    borderWidth: 1,
-    borderColor: '#7A9AEC',
-  },
-  tagUnselected: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-  },
-  tagText: { fontSize: SCREEN_WIDTH * 0.035 },
-  tagTextSelected: {
-    color: '#7A9AEC',
-    fontWeight: 'bold',
-  },
-  tagTextUnselected: {
-    color: 'white',
-    fontWeight: '500',
+    gap: SCREEN_WIDTH * 0.01,
   },
 });

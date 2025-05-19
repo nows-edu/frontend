@@ -70,12 +70,11 @@ export default function TabLayout() {
         tabBarStyle: styles.tabBar,
         tabBarBackground: () => <GradientTabBarBackground />,
         tabBarIcon: ({ focused }) => {
-          let iconName: keyof typeof MaterialIcons.glyphMap;
-          switch (route.name) {
-            case 'home': iconName = 'home'; break;
+          let iconName: keyof typeof MaterialIcons.glyphMap;          switch (route.name) {
+            case 'home': iconName = 'home-filled'; break;
             case 'experiences': iconName = 'apps'; break;
             case 'explore': return <CenterButton focused={focused} />;
-            case 'chat': iconName = 'chat'; break;
+            case 'chat': iconName = 'chat-bubble-outline'; break;
             case 'profile': iconName = 'person'; break;
             default: iconName = 'circle';
           }
@@ -101,18 +100,17 @@ export default function TabLayout() {
   );
 }
 
-const styles = StyleSheet.create({
-  tabBar: {
+const styles = StyleSheet.create({  tabBar: {
     height: TAB_BAR_HEIGHT,
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    borderTopLeftRadius: Math.min(SCREEN_WIDTH * 0.03, 24),
-    borderTopRightRadius: Math.min(SCREEN_WIDTH * 0.03, 24),
     backgroundColor: 'transparent',
     elevation: 0,
     shadowOpacity: 0,
+    borderTopWidth: 0,
+    borderTopColor: 'transparent',
   },
   tabBarBg: {
     flex: 1,
