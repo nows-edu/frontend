@@ -1,11 +1,14 @@
 import Header from '@/components/General/Header';
 import ProfileBanner from '@/components/Profile/Banner';
+import { EmptyAgenda, EmptyNows } from '@/components/Profile/EmptyStates';
 import ProfileInfo from '@/components/Profile/Info';
+import Interests from '@/components/Profile/Interests';
 import ProfileStats from '@/components/Profile/Stats';
+import TabSlider, { TabOption } from '@/components/Profile/TabSlider';
 import ProfileName from '@/components/Profile/user';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 export default function ProfileScreen() {
@@ -13,33 +16,61 @@ export default function ProfileScreen() {
   const [statusColor, setStatusColor] = useState('rgb(88, 101, 242)');
   const [profileImage, setProfileImage] = useState('');
   const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const [education, setEducation] = useState('');
+  const [degree, setDegree] = useState('');
+  const [location, setLocation] = useState('');
+  const [selectedTab, setSelectedTab] = useState<TabOption>('nows');
 
-  // Load saved profile data on component mount
-  useEffect(() => {
-    const loadProfileData = async () => {
-      try {
-        const hasChangedBefore = await AsyncStorage.getItem('userHasChangedStatus');
-        if (hasChangedBefore === 'true') {
-          const savedStatus = await AsyncStorage.getItem('userStatus');
-          const savedColor = await AsyncStorage.getItem('userStatusColor');
-          if (savedStatus) setStatus(savedStatus);
-          if (savedColor) setStatusColor(savedColor);
-        } else if (isFirstLoad) {
-          // Si es la primera carga y no hay cambios previos, guardamos los valores predeterminados
-          await AsyncStorage.setItem('userStatus', status);
-          await AsyncStorage.setItem('userStatusColor', statusColor);
-          setIsFirstLoad(false);
-        }
+  const loadProfileData = async () => {
+    try {
+      const [
+        hasChangedBefore,
+        savedStatus,
+        savedColor,
+        savedImage,
+        savedEducation,
+        savedDegree,
+        savedLocation
+      ] = await Promise.all([
+        AsyncStorage.getItem('userHasChangedStatus'),
+        AsyncStorage.getItem('userStatus'),
+        AsyncStorage.getItem('userStatusColor'),
+        AsyncStorage.getItem('userProfileImage'),
+        AsyncStorage.getItem('userEducation'),
+        AsyncStorage.getItem('userDegree'),
+        AsyncStorage.getItem('userLocation')
+      ]);
 
-        const savedImage = await AsyncStorage.getItem('userProfileImage');
-        if (savedImage) setProfileImage(savedImage);
-      } catch (error) {
-        console.log('Error loading profile data:', error);
+      if (hasChangedBefore === 'true') {
+        if (savedStatus) setStatus(savedStatus);
+        if (savedColor) setStatusColor(savedColor);
+      } else if (isFirstLoad) {
+        await AsyncStorage.setItem('userStatus', status);
+        await AsyncStorage.setItem('userStatusColor', statusColor);
+        setIsFirstLoad(false);
       }
-    };
-    
+
+      if (savedImage) setProfileImage(savedImage);
+      if (savedEducation) setEducation(savedEducation);
+      if (savedDegree) setDegree(savedDegree);
+      if (savedLocation) setLocation(savedLocation);
+    } catch (error) {
+      console.log('Error loading profile data:', error);
+    }
+  };
+
+  // Cargar datos al montar el componente
+  useEffect(() => {
     loadProfileData();
   }, []);
+
+  // Recargar datos cuando la pantalla obtiene el foco
+  useFocusEffect(
+    useCallback(() => {
+      loadProfileData();
+    }, [])
+  );
+
   // Handle status and color changes
   const handleStatusChange = async (newStatus: string, newColor: string) => {
     setStatus(newStatus);
@@ -91,10 +122,16 @@ export default function ProfileScreen() {
         />
         <ProfileInfo
           items={[
-            { type: 'education', text: 'Ingeniería Informática - UAB' },
-            { type: 'location', text: 'Sant Cugat del Vallés' }
+            { type: 'education', text: degree && education ? `${degree} - ${education.split(' - ')[0]}` : 'Sin universidad' },
+            { type: 'location', text: location || 'Sin ubicación' }
           ]}
         />
+        <Interests statusColor={statusColor} />
+        <TabSlider 
+          onTabChange={setSelectedTab} 
+          initialTab={selectedTab}
+        />
+        {selectedTab === 'nows' ? <EmptyNows /> : <EmptyAgenda />}
       </View>
     </View>
   );

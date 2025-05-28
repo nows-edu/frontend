@@ -6,7 +6,7 @@ import TopBar from '../../components/Home/TopBar';
 const fetchCategoriesFromAPI = async () => {
   // Simulating API request with a delay
   await new Promise(resolve => setTimeout(resolve, 500));
-  return ['Populares', 'Nuevos', 'Cercanos', 'Favoritos', 'Tendencias', 'Recomendados'];
+  return ['Retos', 'Opiniones', 'Usuarios', 'Clubes', 'Comunidades', 'Actividades'];
 };
 
 const fetchSelectedCategoriesFromAPI = async () => {

@@ -38,8 +38,9 @@ export default function RootLayout() {
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="game" options={{ headerShown: false }} />
-          <Stack.Screen name="search" options={{ headerShown: false }} />
-          <Stack.Screen name="notifications" options={{ headerShown: false }} />
+          <Stack.Screen name="search" options={{ headerShown: false }} />          <Stack.Screen name="notifications" options={{ headerShown: false }} />
+          <Stack.Screen name="edit-info" options={{ headerShown: false, presentation: 'modal' }} />
+          <Stack.Screen name="edit-interests" options={{ headerShown: false, presentation: 'modal' }} />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="auto" />

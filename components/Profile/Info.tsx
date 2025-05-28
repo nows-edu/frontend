@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -19,14 +20,19 @@ type ProfileInfoProps = {
  * @param items List of info items, each with a type determining icon and display text.
  */
 export default function ProfileInfo({ items = [] }: ProfileInfoProps) {
+  const handlePress = () => {
+    router.push('/edit-info');
+  };
+
   return (
-    <View style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={handlePress}>
       {items.map((item, index) => {
         const iconName = item.type === 'education'
           ? 'school'
           : item.type === 'location'
             ? 'location-sharp'
-            : 'information-circle';        return (
+            : 'information-circle';
+        return (
           <View key={index} style={[
             styles.row,
             index < items.length - 1 && { marginBottom: SCREEN_WIDTH * 0.015 }
@@ -38,7 +44,7 @@ export default function ProfileInfo({ items = [] }: ProfileInfoProps) {
           </View>
         );
       })}
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -50,7 +56,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: SCREEN_WIDTH * 0.04,
     marginHorizontal: SCREEN_WIDTH * 0.04,
     marginTop: SCREEN_WIDTH * 0.06,
-  },  row: {
+  },
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
   },
