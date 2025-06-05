@@ -1,7 +1,8 @@
+
 import SearchBar from '@/components/Search/SearchBar';
 import UserRow from '@/components/Search/UserRow';
 import { User, followService } from '@/utils/followService';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -15,31 +16,48 @@ type UserWithFollowState = User & {
   isFollowing?: boolean;
 };
 
-const SearchScreen = () => {
-  const [query, setQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
-  const [suggestedUsers, setSuggestedUsers] = useState<UserWithFollowState[]>([]);
+const UserListScreen = () => {
+  // Hide the default header
+  React.useEffect(() => {
+    router.setParams({ header: 'none' });
+  }, []);
+
+  const params = useLocalSearchParams();
+  const userId = params.userId as string;
+  const type = params.type as 'following' | 'followers' | 'visits';
   const currentUserId = 'carol'; // Current user ID
 
-  // Load users and their follow state
+  const [query, setQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [users, setUsers] = useState<UserWithFollowState[]>([]);
+
+  // Load users based on type
   const loadUsers = useCallback(async () => {
     try {
-      const allUsers = await followService.allUsers();
+      let fetchedUsers: User[] = [];
+      switch (type) {
+        case 'following':
+          fetchedUsers = await followService.getFollowing(userId);
+          break;
+        case 'followers':
+          fetchedUsers = await followService.getFollowers(userId);
+          break;
+        case 'visits':
+          fetchedUsers = await followService.getVisits(userId);
+          break;
+      }
+
       const usersWithState = await Promise.all(
-        Object.values(allUsers)
-          .filter((user): user is User => {
-            return user.id !== currentUserId && typeof user.id === 'string';
-          })
-          .map(async (user: User) => ({
-            ...user,
-            isFollowing: await followService.isFollowing(currentUserId, user.id)
-          }))
+        fetchedUsers.map(async (user: User) => ({
+          ...user,
+          isFollowing: await followService.isFollowing(currentUserId, user.id)
+        }))
       );
-      setSuggestedUsers(usersWithState);
+      setUsers(usersWithState);
     } catch (error) {
       console.error('Error loading users:', error);
     }
-  }, []);
+  }, [type, userId]);
 
   useEffect(() => {
     loadUsers();
@@ -47,7 +65,7 @@ const SearchScreen = () => {
 
   const handleToggleFollow = async (targetUserId: string) => {
     try {
-      const userToUpdate = suggestedUsers.find(u => u.id === targetUserId);
+      const userToUpdate = users.find(u => u.id === targetUserId);
       if (!userToUpdate) return;
 
       if (userToUpdate.isFollowing) {
@@ -56,8 +74,7 @@ const SearchScreen = () => {
         await followService.followUser(currentUserId, targetUserId);
       }
 
-      // Update UI
-      setSuggestedUsers(prev => 
+      setUsers(prev => 
         prev.map(user => 
           user.id === targetUserId 
             ? { ...user, isFollowing: !user.isFollowing }
@@ -70,7 +87,7 @@ const SearchScreen = () => {
   };
 
   const debouncedSearch = useDebouncedCallback(
-    async (searchQuery: string) => {
+    (searchQuery: string) => {
       setIsSearching(false);
     },
     500
@@ -85,24 +102,36 @@ const SearchScreen = () => {
   }, []);
 
   const filteredUsers = query.trim()
-    ? suggestedUsers.filter(user =>
+    ? users.filter(user =>
         user.name.toLowerCase().includes(query.toLowerCase()) ||
         user.username.toLowerCase().includes(query.toLowerCase())
       )
-    : suggestedUsers;
+    : users;
+
+  const getTitle = () => {
+    switch (type) {
+      case 'following':
+        return 'Seguidos';
+      case 'followers':
+        return 'Seguidores';
+      case 'visits':
+        return 'Visitas';
+      default:
+        return '';
+    }
+  };
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Text style={styles.emptyStateText}>
         {query.trim() 
           ? 'No se encontraron usuarios'
-          : 'Busca usuarios por nombre o username'}
+          : 'No hay usuarios para mostrar'}
       </Text>
     </View>
   );
 
-  return (
-    <View style={styles.container}>
+  return (    <View style={styles.container}>
       <StatusBar style="light" />
       
       <SafeAreaView edges={['top']} style={styles.header}>
@@ -114,7 +143,7 @@ const SearchScreen = () => {
             onPress={() => router.back()}
             style={styles.backButton}
           />
-          <Text style={styles.headerTitle}>Buscador</Text>
+          <Text style={styles.headerTitle}>{getTitle()}</Text>
           <View style={{ width: 40 }} />
         </View>
         <View style={styles.divider} />
@@ -129,10 +158,11 @@ const SearchScreen = () => {
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        {!query.trim() ? (
+        {isSearching ? (
+          <ActivityIndicator style={styles.loading} color="#fff" />
+        ) : filteredUsers.length > 0 ? (
           <>
-            <Text style={styles.sectionTitle}>Sugerencias</Text>
-            {suggestedUsers.map(user => (
+            {filteredUsers.map(user => (
               <UserRow
                 key={user.id}
                 {...user}
@@ -142,27 +172,10 @@ const SearchScreen = () => {
             ))}
           </>
         ) : (
-          <>
-            {isSearching ? (
-              <ActivityIndicator style={styles.loading} color="#fff" />
-            ) : filteredUsers.length > 0 ? (
-              <>
-                <Text style={styles.sectionTitle}>Resultados</Text>
-                {filteredUsers.map(user => (
-                  <UserRow
-                    key={user.id}
-                    {...user}
-                    isFollowing={user.isFollowing ?? false}
-                    onToggleFollow={() => handleToggleFollow(user.id)}
-                  />
-                ))}
-              </>
-            ) : (
-              renderEmptyState()
-            )}
-          </>
+          renderEmptyState()
         )}
       </ScrollView>
+      <StatusBar style="light" />
     </View>
   );
 };
@@ -205,13 +218,8 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingBottom: SCREEN_WIDTH * 0.04,
   },
-  sectionTitle: {
-    color: '#fff',
-    fontSize: SCREEN_WIDTH * 0.045,
-    fontWeight: '600',
-    marginHorizontal: SCREEN_WIDTH * 0.04,
-    marginTop: SCREEN_WIDTH * 0.04,
-    marginBottom: SCREEN_WIDTH * 0.02,
+  loading: {
+    marginTop: SCREEN_WIDTH * 0.2,
   },
   emptyState: {
     flex: 1,
@@ -224,9 +232,6 @@ const styles = StyleSheet.create({
     fontSize: SCREEN_WIDTH * 0.04,
     textAlign: 'center',
   },
-  loading: {
-    marginTop: SCREEN_WIDTH * 0.2,
-  },
 });
 
-export default SearchScreen;
+export default UserListScreen;

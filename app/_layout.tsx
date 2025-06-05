@@ -34,13 +34,15 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'light' ? DarkTheme : DefaultTheme}>
-      <PaperProvider>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="game" options={{ headerShown: false }} />
-          <Stack.Screen name="search" options={{ headerShown: false }} />          <Stack.Screen name="notifications" options={{ headerShown: false }} />
-          <Stack.Screen name="edit-info" options={{ headerShown: false, presentation: 'modal' }} />
-          <Stack.Screen name="edit-interests" options={{ headerShown: false, presentation: 'modal' }} />
+      <PaperProvider>        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="game" />
+          <Stack.Screen name="search" />
+          <Stack.Screen name="user-list" />
+          <Stack.Screen name="notifications" />
+          <Stack.Screen name="edit-info" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="edit-interests" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="profile" />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="auto" />

@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
-import React, { useState, useEffect } from 'react';
-import { Dimensions, Image, Pressable, StyleSheet, Text, View, Animated } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Animated, Dimensions, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
 
 type UserRowProps = {
   id: string;
@@ -44,42 +45,53 @@ export default function UserRow({
     }
   }, [isFollowing]);
 
+  const handlePress = () => {
+    if (onPress) {
+      onPress();
+    } else {
+      router.push(`/profile?userId=${id}`);
+    }
+  };
+
   return (
     <Pressable 
       style={styles.container}
-      onPress={onPress || (() => router.push(`/${id}`))}
+      onPress={handlePress}
     >
       <Image source={{ uri: avatarUrl }} style={styles.avatar} />
       <View style={styles.infoContainer}>
         <Text style={styles.name} numberOfLines={1}>{name}</Text>
         <Text style={styles.username} numberOfLines={1}>@{username}</Text>
       </View>
-      <Pressable        style={[
-          styles.button, 
-          isFollowing && styles.buttonFollowing,
-          { transform: [{ scale: scaleAnim }] }
-        ]}
-        onPress={(e) => {
-          e.stopPropagation();
-          onToggleFollow();
-        }}
-      >
-        <Text style={[
-          styles.buttonText,
-          isFollowing && styles.buttonTextFollowing
-        ]}>
-          {isFollowing ? 'Siguiendo' : 'Seguir'}
-        </Text>
-      </Pressable>
+      <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+        <Pressable
+          style={[
+            styles.button, 
+            isFollowing && styles.buttonFollowing
+          ]}
+          onPress={(e) => {
+            e.stopPropagation();
+            onToggleFollow();
+          }}
+        >
+          <Text style={[
+            styles.buttonText,
+            isFollowing && styles.buttonTextFollowing
+          ]}>
+            {isFollowing ? 'Siguiendo' : 'Seguir'}
+          </Text>
+        </Pressable>
+      </Animated.View>
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({  container: {
+const styles = StyleSheet.create({
+  container: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: SCREEN_WIDTH * 0.03,
-    paddingHorizontal: SCREEN_WIDTH * 0.02,
+    paddingHorizontal: SCREEN_WIDTH * 0.035,
     borderBottomWidth: 0.5,
     borderBottomColor: 'rgba(255,255,255,0.1)',
   },
@@ -102,15 +114,15 @@ const styles = StyleSheet.create({  container: {
   username: {
     color: 'rgba(255,255,255,0.6)',
     fontSize: SCREEN_WIDTH * 0.03,
-  },  button: {
+  },
+  button: {
     borderWidth: 1.5,
-    borderColor: 'white',
+    borderColor: 'rgba(255,255,255,0.8)',
     borderRadius: SCREEN_WIDTH * 0.02,
     paddingHorizontal: SCREEN_WIDTH * 0.04,
     paddingVertical: SCREEN_WIDTH * 0.015,
     minWidth: SCREEN_WIDTH * 0.2,
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   buttonFollowing: {
     backgroundColor: 'rgba(122, 154, 236, 0.2)',

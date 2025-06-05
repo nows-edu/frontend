@@ -82,8 +82,7 @@ export default function EditInterestsScreen() {
   const isInterestSelected = (interest: string) => selectedInterests.includes(interest);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={styles.container}>      <View style={styles.header}>
         <TouchableOpacity 
           onPress={() => router.back()}
           style={styles.backButton}
@@ -98,6 +97,7 @@ export default function EditInterestsScreen() {
         <TouchableOpacity 
           onPress={handleSave}
           disabled={selectedInterests.length !== 3}
+          style={styles.saveButtonContainer}
         >
           <Text style={[
             styles.saveButton,
@@ -132,23 +132,30 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-  },
-  header: {
+  },  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingRight: SCREEN_WIDTH * 0.04,
     height: SCREEN_WIDTH * 0.13,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.1)',
   },
   backButton: {
-    marginLeft: -SCREEN_WIDTH * 0.02,
+    position: 'absolute',
+    left: 0,
+    zIndex: 1,
   },
   headerTitle: {
+    flex: 1,
     color: 'white',
-    fontSize: SCREEN_WIDTH * 0.04,
-    fontWeight: '500',
+    fontSize: SCREEN_WIDTH * 0.045,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginHorizontal: SCREEN_WIDTH * 0.1,
+  },
+  saveButtonContainer: {
+    position: 'absolute',
+    right: SCREEN_WIDTH * 0.04,
+    zIndex: 1,
   },
   saveButton: {
     color: '#7A9AEC',

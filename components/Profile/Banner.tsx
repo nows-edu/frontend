@@ -18,6 +18,7 @@ type ProfileBannerProps = {
   onStatusChange?: (status: string, color: string) => void;
   imageUri?: string;
   onImageChange?: (uri: string) => void;
+  isEditable?: boolean;
 };
 
 export default function ProfileBanner({
@@ -26,6 +27,7 @@ export default function ProfileBanner({
   onStatusChange = () => {},
   imageUri = '',
   onImageChange = () => {},
+  isEditable = true,
 }: ProfileBannerProps) {
   const theme = useTheme();
   const [editVisible, setEditVisible] = useState(false);
@@ -41,11 +43,12 @@ export default function ProfileBanner({
     'rgb(88, 101, 242)',   // Azul Discord
     'rgb(250, 38, 38)',    // Rojo
     'rgb(53, 36, 230)',    // Verde
-    'rgb(250, 179, 226)'     // Amarillo
+    'rgb(250, 179, 226)'   // Rosa
   ];
   const presetStatuses = ['Estudiante', 'Aura', 'Imparable', 'No molestar'];
 
   const openImagePicker = async () => {
+    if (!isEditable) return;
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') return;
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -58,17 +61,26 @@ export default function ProfileBanner({
       onImageChange(result.assets[0].uri);
     }
   };
+
+  const handleBannerPress = () => {
+    if (isEditable) {
+      setEditVisible(true);
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      {/* Colored banner full-width */}
-      <TouchableOpacity 
+    <View style={styles.container}>      <TouchableOpacity 
         style={[styles.banner, { backgroundColor: statusColor }]} 
-        onPress={() => setEditVisible(true)}
+        onPress={handleBannerPress}
+        disabled={!isEditable}
       >        
         <Text style={styles.statusText}>{statusText.toUpperCase()}</Text>
       </TouchableOpacity>
-      {/* Profile image overlapping */}
-      <TouchableOpacity style={styles.imageWrapper} onPress={openImagePicker}>
+      <TouchableOpacity 
+        style={styles.imageWrapper} 
+        onPress={openImagePicker}
+        disabled={!isEditable}
+      >
         {imageUri ? (
           <Image source={{ uri: imageUri }} style={styles.image} />
         ) : (
@@ -76,90 +88,89 @@ export default function ProfileBanner({
         )}
       </TouchableOpacity>
 
-      <Modal visible={editVisible} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
-            <Text variant="titleMedium" style={[styles.modalTitle, { color: theme.colors.onSurface }]}>
-              Editar estado
-            </Text>
-            <Divider />            <View>
-              {presetStatuses.map((status) => (
-                <TouchableOpacity
-                  key={status}
-                  style={styles.optionRow}
-                  onPress={() => setTempStatus(status)}
-                >
-                  <RadioButton
-                    value={status}
-                    status={tempStatus === status ? 'checked' : 'unchecked'}
+      {isEditable && (
+        <Modal visible={editVisible} transparent animationType="slide">
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
+              <Text variant="titleMedium" style={[styles.modalTitle, { color: theme.colors.onSurface }]}>
+                Editar estado
+              </Text>
+              <Divider />            <View>
+                {presetStatuses.map((status) => (
+                  <TouchableOpacity
+                    key={status}
+                    style={styles.optionRow}
                     onPress={() => setTempStatus(status)}
+                  >
+                    <RadioButton
+                      value={status}
+                      status={tempStatus === status ? 'checked' : 'unchecked'}
+                      onPress={() => setTempStatus(status)}
+                    />
+                    <Text style={{ color: theme.colors.onSurface }}>{status}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text variant="titleMedium" style={[styles.modalTitle, { marginTop: 16, color: theme.colors.onSurface }]}>
+                Color de fondo
+              </Text>
+              <Divider />
+              <View style={styles.colorsRow}>
+                {presetColors.map(color => (
+                  <TouchableOpacity
+                    key={color}
+                    style={[
+                      styles.colorDot,
+                      { backgroundColor: color },
+                      tempColor === color && styles.colorDotSelected
+                    ]}
+                    onPress={() => setTempColor(color)}
                   />
-                  <Text style={{ color: theme.colors.onSurface }}>{status}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            <Text variant="titleMedium" style={[styles.modalTitle, { marginTop: 16, color: theme.colors.onSurface }]}>
-              Color de fondo
-            </Text>
-            <Divider />
-            <View style={styles.colorsRow}>
-              {presetColors.map(color => (
-                <TouchableOpacity
-                  key={color}
-                  style={[
-                    styles.colorDot,
-                    { backgroundColor: color },
-                    tempColor === color && styles.colorDotSelected
-                  ]}
-                  onPress={() => setTempColor(color)}
-                />
-              ))}
-            </View>
-            <View style={styles.modalButtons}>
-              <Button
-                onPress={() => setEditVisible(false)}
-                textColor={theme.colors.onSurface}
-              >
-                Cancelar
-              </Button>              <Button
-                mode="contained"
-                onPress={() => {
-                  if (tempStatus !== statusText || tempColor !== statusColor) {
-                    onStatusChange(tempStatus, tempColor);
-                  }
-                  setEditVisible(false);
-                }}
-              >
-                Guardar
-              </Button>
+                ))}
+              </View>
+              <View style={styles.modalButtons}>
+                <Button
+                  onPress={() => setEditVisible(false)}
+                  textColor={theme.colors.onSurface}
+                >
+                  Cancelar
+                </Button>              <Button
+                  mode="contained"
+                  onPress={() => {
+                    if (tempStatus !== statusText || tempColor !== statusColor) {
+                      onStatusChange(tempStatus, tempColor);
+                    }
+                    setEditVisible(false);
+                  }}
+                >
+                  Guardar
+                </Button>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      )}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
+const styles = StyleSheet.create({  container: {
     width: '100%',
-    height: IMAGE_SIZE,
-    backgroundColor: 'transparent',
-    alignSelf: 'stretch',
-    justifyContent: 'center',
-  },  banner: {
+    height: BANNER_HEIGHT * 0.75, // Reducimos la altura del contenedor
+    position: 'relative',
+    marginTop: IMAGE_SIZE * 0.5,
+  },
+  banner: {
     width: '100%',
     height: BANNER_HEIGHT,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingRight: IMAGE_SIZE + 32, // Compensar el espacio de la imagen
-    borderRadius: 0,
-    alignSelf: 'stretch',
     position: 'absolute',
-    top: (IMAGE_SIZE - BANNER_HEIGHT) / 2,
-  },  statusText: {
+    top: -BANNER_HEIGHT * 0.5
+  },
+  statusText: {
     position: 'absolute',
-    left: SCREEN_WIDTH * 0.13, // Ajustado para estar un poco más centrado
+    left: SCREEN_WIDTH * 0.13,
     transform: [
       { skewX: '-10deg' }
     ],
@@ -169,22 +180,27 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     letterSpacing: 0.5,
     maxWidth: MAX_TEXT_WIDTH,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
   },
   imageWrapper: {
     position: 'absolute',
-    top: 0,
-    right: 16,
+    right: 20,
+    top: -IMAGE_SIZE * 0.5, // Mantenemos la posición original de la imagen
     width: IMAGE_SIZE,
     height: IMAGE_SIZE,
     borderRadius: IMAGE_SIZE / 2,
     overflow: 'hidden',
-    borderWidth: 3,
+    borderWidth: 4,
     borderColor: 'white',
+    zIndex: 1,
   },
   image: {
     width: '100%',
     height: '100%',
-  },  imagePlaceholder: {
+  },
+  imagePlaceholder: {
     flex: 1,
   },
   modalOverlay: {

@@ -13,19 +13,25 @@ type ProfileInfoItem = {
 
 type ProfileInfoProps = {
   items?: ProfileInfoItem[];
+  isEditable?: boolean;
 };
 
 /**
  * ProfileInfo component
  * @param items List of info items, each with a type determining icon and display text.
+ * @param isEditable Whether the info can be edited (determines if it's clickable)
  */
-export default function ProfileInfo({ items = [] }: ProfileInfoProps) {
+export default function ProfileInfo({ items = [], isEditable = false }: ProfileInfoProps) {
   const handlePress = () => {
-    router.push('/edit-info');
+    if (isEditable) {
+      router.push('/edit-info');
+    }
   };
 
+  const Wrapper = isEditable ? TouchableOpacity : View;
+
   return (
-    <TouchableOpacity style={styles.container} onPress={handlePress}>
+    <Wrapper style={styles.container} {...(isEditable ? { onPress: handlePress } : {})}>
       {items.map((item, index) => {
         const iconName = item.type === 'education'
           ? 'school'
@@ -44,7 +50,7 @@ export default function ProfileInfo({ items = [] }: ProfileInfoProps) {
           </View>
         );
       })}
-    </TouchableOpacity>
+    </Wrapper>
   );
 }
 
@@ -55,7 +61,7 @@ const styles = StyleSheet.create({
     paddingVertical: SCREEN_WIDTH * 0.03,
     paddingHorizontal: SCREEN_WIDTH * 0.04,
     marginHorizontal: SCREEN_WIDTH * 0.04,
-    marginTop: SCREEN_WIDTH * 0.06,
+    marginTop: SCREEN_WIDTH * 0.05,
   },
   row: {
     flexDirection: 'row',

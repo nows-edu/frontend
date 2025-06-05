@@ -11,22 +11,31 @@ type InterestItem = string;
 type InterestsProps = {
   items?: InterestItem[];
   statusColor?: string;
+  isEditable?: boolean;
 };
 
 export default function Interests({ 
   items = [],
-  statusColor = '#7A9AEC'
+  statusColor = '#7A9AEC',
+  isEditable = true
 }: InterestsProps) {
   const [interests, setInterests] = React.useState(items);
-  React.useEffect(() => {
-    loadInterests();
-  }, []);
 
-  // Recargar intereses cuando el componente recibe el foco
+  React.useEffect(() => {
+    if (isEditable) {
+      loadInterests();
+    } else {
+      setInterests(items);
+    }
+  }, [isEditable, items]);
+
+  // Recargar intereses cuando el componente recibe el foco (solo si es editable)
   useFocusEffect(
     React.useCallback(() => {
-      loadInterests();
-    }, [])
+      if (isEditable) {
+        loadInterests();
+      }
+    }, [isEditable])
   );
 
   const loadInterests = async () => {
@@ -38,18 +47,23 @@ export default function Interests({
     } catch (error) {
       console.error('Error loading interests:', error);
     }
-  };  const handlePress = () => {
-    router.push('/edit-interests' as any);
+  };
+
+  const handlePress = () => {
+    if (isEditable) {
+      router.push('/edit-interests');
+    }
   };
 
   const getStyles = (color: string) => StyleSheet.create({
     container: {
       backgroundColor: '#000',
       marginHorizontal: SCREEN_WIDTH * 0.04,
-      marginTop: SCREEN_WIDTH * 0.03,
+      marginTop: SCREEN_WIDTH * 0.02,
       borderRadius: SCREEN_WIDTH * 0.02,
       padding: SCREEN_WIDTH * 0.03,
-    },    tagContainer: {
+    },
+    tagContainer: {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
@@ -78,9 +92,11 @@ export default function Interests({
   });
 
   const styles = getStyles(statusColor);
+  const Container = isEditable ? TouchableOpacity : View;
 
   return (
-    <TouchableOpacity style={styles.container} onPress={handlePress}>      <View style={styles.tagContainer}>
+    <Container style={styles.container} {...(isEditable ? { onPress: handlePress } : {})}>
+      <View style={styles.tagContainer}>
         {interests.map((interest, index) => (
           <React.Fragment key={index}>
             <Text style={styles.interestText}>{interest}</Text>
@@ -88,6 +104,6 @@ export default function Interests({
           </React.Fragment>
         ))}
       </View>
-    </TouchableOpacity>
+    </Container>
   );
 }
