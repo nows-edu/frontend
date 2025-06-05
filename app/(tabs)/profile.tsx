@@ -9,6 +9,7 @@ import Interests from '@/components/Profile/Interests';
 import ProfileStats from '@/components/Profile/Stats';
 import TabSlider, { TabOption } from '@/components/Profile/TabSlider';
 import UserDisplay from '@/components/Profile/UserDisplay';
+import { CareerItem } from '@/types/career';
 import { followService } from '@/utils/followService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
@@ -90,6 +91,7 @@ export default function ProfileScreen() {
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [visitCount, setVisitCount] = useState(0);
+  const [editingItem, setEditingItem] = useState<{ index: number; item: CareerItem } | null>(null);
 
   const isOwnProfile = !userId;
   const currentUserId = 'carol'; // For now, hardcoded as 'carol'
@@ -136,7 +138,19 @@ export default function ProfileScreen() {
     }, [loadFollowStats])
   );
   const handleSaveCareerItem = async (item: { year: string; achievement: string; description: string }) => {
-    const updatedItems = [...careerItems, item];
+    let updatedItems;
+    
+    if (editingItem !== null) {
+      // Update existing item
+      updatedItems = careerItems.map((oldItem, index) => 
+        index === editingItem.index ? item : oldItem
+      );
+      setEditingItem(null);
+    } else {
+      // Add new item
+      updatedItems = [...careerItems, item];
+    }
+    
     setCareerItems(updatedItems);
     try {
       await AsyncStorage.setItem('userCareerItems', JSON.stringify(updatedItems));
@@ -239,6 +253,21 @@ export default function ProfileScreen() {
   const handleAddCareerItem = (item: { year: string; achievement: string; description: string }) => {
     setCareerItems(prev => [...prev, item]);
     // TODO: Persist to AsyncStorage in a real implementation
+  };
+
+  const handleEditCareerItem = (index: number, item: CareerItem) => {
+    setEditingItem({ index, item });
+    setIsModalVisible(true);
+  };
+
+  const handleDeleteCareerItem = async (index: number) => {
+    const updatedItems = careerItems.filter((_, i) => i !== index);
+    setCareerItems(updatedItems);
+    try {
+      await AsyncStorage.setItem('userCareerItems', JSON.stringify(updatedItems));
+    } catch (error) {
+      console.error('Error deleting career item:', error);
+    }
   };
 
   if (otherUserProfile) {
@@ -357,18 +386,27 @@ export default function ProfileScreen() {
         />
         {selectedTab === 'nows' ? (
           <EmptyNows />        ) : selectedTab === 'career' ? (
-          <>
-            <Career 
+          <>            <Career 
               items={careerItems} 
               color={statusColor}
               isEditable={true}
-              onAddItem={() => setIsModalVisible(true)}
-            />
-            <CareerModal
+              onAddItem={() => {
+                setEditingItem(null);
+                setIsModalVisible(true);
+              }}
+              onEditItem={handleEditCareerItem}
+              onDeleteItem={handleDeleteCareerItem}
+            />            <CareerModal
               visible={isModalVisible}
-              onClose={() => setIsModalVisible(false)}
+              onClose={() => {
+                setIsModalVisible(false);
+                setEditingItem(null);
+              }}
               onSave={handleSaveCareerItem}
               color={statusColor}
+              initialValues={editingItem?.item}
+              isEditing={!!editingItem}
+              onDelete={editingItem ? () => handleDeleteCareerItem(editingItem.index) : undefined}
             />
           </>
         ) : (

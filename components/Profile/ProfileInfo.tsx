@@ -33,7 +33,7 @@ export default function ProfileInfo({ name, username, rightContent }: ProfileInf
 
 const styles = StyleSheet.create({  container: {
     paddingHorizontal: SCREEN_WIDTH * 0.05,
-    marginTop: -BANNER_HEIGHT * 1.2,
+    marginTop: -BANNER_HEIGHT * 0.5,
     marginBottom: SCREEN_WIDTH * 0.02,
     alignItems: 'center',
   },

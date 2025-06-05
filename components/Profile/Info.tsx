@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     paddingVertical: SCREEN_WIDTH * 0.03,
     paddingHorizontal: SCREEN_WIDTH * 0.04,
     marginHorizontal: SCREEN_WIDTH * 0.04,
-    marginTop: SCREEN_WIDTH * 0.05,
+    marginTop: SCREEN_WIDTH * 0.035,
   },
   row: {
     flexDirection: 'row',

@@ -7,13 +7,24 @@ type CareerModalProps = {
   visible: boolean;
   onClose: () => void;
   onSave: (item: { year: string; achievement: string; description: string }) => void;
+  onDelete?: () => void;
   color: string;
+  initialValues?: { year: string; achievement: string; description?: string };
+  isEditing?: boolean;
 };
 
-export default function CareerModal({ visible, onClose, onSave, color }: CareerModalProps) {
-  const [year, setYear] = useState('');
-  const [achievement, setAchievement] = useState('');
-  const [description, setDescription] = useState('');
+export default function CareerModal({ 
+  visible, 
+  onClose, 
+  onSave,
+  onDelete, 
+  color,
+  initialValues,
+  isEditing
+}: CareerModalProps) {
+  const [year, setYear] = useState(initialValues?.year || '');
+  const [achievement, setAchievement] = useState(initialValues?.achievement || '');
+  const [description, setDescription] = useState(initialValues?.description || '');
 
   const handleSave = () => {
     if (year && achievement) {
@@ -34,7 +45,9 @@ export default function CareerModal({ visible, onClose, onSave, color }: CareerM
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Nuevo logro académico</Text>
+          <Text style={styles.modalTitle}>
+            {isEditing ? 'Editar logro académico' : 'Nuevo logro académico'}
+          </Text>
           
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Año</Text>
@@ -70,21 +83,32 @@ export default function CareerModal({ visible, onClose, onSave, color }: CareerM
               multiline
               numberOfLines={4}
             />
-          </View>
-
-          <View style={styles.buttonContainer}>
-            <Pressable 
-              style={[styles.button, styles.cancelButton]} 
-              onPress={onClose}
-            >
-              <Text style={styles.buttonText}>Cancelar</Text>
-            </Pressable>
-            <Pressable 
-              style={[styles.button, styles.saveButton, { backgroundColor: color }]}
-              onPress={handleSave}
-            >
-              <Text style={styles.buttonText}>Guardar</Text>
-            </Pressable>
+          </View>          <View style={styles.buttonContainer}>
+            {isEditing && (
+              <Pressable 
+                style={[styles.button, styles.deleteButton]} 
+                onPress={() => {
+                  onDelete?.();
+                  onClose();
+                }}
+              >
+                <Text style={styles.buttonText}>Eliminar</Text>
+              </Pressable>
+            )}
+            <View style={styles.rightButtons}>
+              <Pressable 
+                style={[styles.button, styles.cancelButton]} 
+                onPress={onClose}
+              >
+                <Text style={styles.buttonText}>Cancelar</Text>
+              </Pressable>
+              <Pressable 
+                style={[styles.button, styles.saveButton, { backgroundColor: color }]}
+                onPress={handleSave}
+              >
+                <Text style={styles.buttonText}>{isEditing ? 'Actualizar' : 'Guardar'}</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
       </View>
@@ -149,10 +173,17 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     backgroundColor: '#007AFF',
-  },
-  buttonText: {
+  },  buttonText: {
     color: 'white',
     fontSize: SCREEN_WIDTH * 0.035,
     fontWeight: '600',
   },
+  rightButtons: {
+    flexDirection: 'row',
+    gap: SCREEN_WIDTH * 0.03,
+  },
+  deleteButton: {
+    backgroundColor: '#DC3545',
+    marginRight: 'auto',
+  }
 });

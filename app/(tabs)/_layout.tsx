@@ -14,16 +14,16 @@ const CENTER_BUTTON_SIZE = Math.min(SCREEN_WIDTH * 0.16, 65);
 // Colores del tema
 const COLORS = {
   gradient: {
-    dark1: 'rgba(18, 18, 18, 1)',
-    dark2: 'rgba(26, 26, 26, 1)',
+    dark1: 'rgba(0, 0, 0, 1)',
+    dark2: 'rgba(0, 0, 0, 1)',
   },
   button: {
-    primary: 'rgb(74, 119, 234)',
-    primaryTransparent: 'rgba(122, 154, 236, 0.8)',
+    primary: '#000000',
+    primaryTransparent: 'rgba(0, 0, 0, 0.8)',
   },
   icon: {
-    active: 'rgba(122, 154, 236, 1)',
-    inactive: 'rgba(153, 153, 153, 1)',
+    active: '#FFFFFF',
+    inactive: 'rgba(255, 255, 255, 0.3)',
   },
   text: {
     white: 'rgba(255, 255, 255, 1)',
@@ -47,16 +47,13 @@ function GradientTabBarBackground() {
 function CenterButton({ focused }: { focused: boolean }) {
   return (
     <View style={styles.centerButtonWrapper}>
-      <LinearGradient
-        colors={[COLORS.button.primary, COLORS.button.primary]}
-        style={styles.centerButton}
-      >
+      <View style={[styles.centerButton, { backgroundColor: '#FFFFFF' }]}>
         <MaterialIcons 
           name="add" 
           size={CENTER_BUTTON_SIZE * 0.5} 
-          color={COLORS.text.white} 
+          color="#000000" 
         />
-      </LinearGradient>
+      </View>
     </View>
   );
 }
@@ -70,12 +67,11 @@ export default function TabLayout() {
         tabBarStyle: styles.tabBar,
         tabBarBackground: () => <GradientTabBarBackground />,
         tabBarIcon: ({ focused }) => {
-          let iconName: keyof typeof MaterialIcons.glyphMap;          switch (route.name) {
-            case 'home': iconName = 'home-filled'; break;
-            case 'experiences': iconName = 'apps'; break;
+          let iconName: keyof typeof MaterialIcons.glyphMap;          switch (route.name) {            case 'home': iconName = focused ? 'home' : 'home'; break;
+            case 'experiences': iconName = focused ? 'favorite' : 'favorite-outline'; break;
             case 'explore': return <CenterButton focused={focused} />;
-            case 'chat': iconName = 'chat-bubble-outline'; break;
-            case 'profile': iconName = 'person'; break;
+            case 'chat': iconName = focused ? 'textsms' : 'chat-bubble-outline'; break;
+            case 'profile': iconName = focused ? 'person' : 'person-outline'; break;
             default: iconName = 'circle';
           }
           return (
@@ -107,15 +103,18 @@ const styles = StyleSheet.create({  tabBar: {
     left: 0,
     right: 0,
     backgroundColor: 'transparent',
-    elevation: 0,
-    shadowOpacity: 0,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     borderTopWidth: 0,
     borderTopColor: 'transparent',
   },
   tabBarBg: {
     flex: 1,
-    borderTopLeftRadius: Math.min(SCREEN_WIDTH * 0.03, 24),
-    borderTopRightRadius: Math.min(SCREEN_WIDTH * 0.03, 24),
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
   },
   centerButtonWrapper: {
     alignItems: 'center',

@@ -31,23 +31,26 @@ export default function FollowButton({ isFollowing, onToggleFollow, style }: Fol
 
 const styles = StyleSheet.create({
   button: {
-    borderWidth: 1.5,
-    borderColor: '#7A9AEC',    borderRadius: SCREEN_WIDTH * 0.02,
-    paddingHorizontal: SCREEN_WIDTH * 0.04,
-    paddingVertical: SCREEN_WIDTH * 0.015,
-    minWidth: SCREEN_WIDTH * 0.2,
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+    borderRadius: SCREEN_WIDTH * 0.02,
+    paddingHorizontal: SCREEN_WIDTH * 0.03,
+    paddingVertical: SCREEN_WIDTH * 0.01,
+    minWidth: SCREEN_WIDTH * 0.18,
     alignItems: 'center',
-    alignSelf: 'center'
+    alignSelf: 'center',
+    backgroundColor: '#FFFFFF',
   },
   buttonFollowing: {
-    backgroundColor: 'rgba(122, 154, 236, 0.2)',
+    backgroundColor: 'transparent',
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   buttonText: {
-    color: '#7A9AEC',
-    fontSize: SCREEN_WIDTH * 0.035,
+    color: '#000000',
+    fontSize: SCREEN_WIDTH * 0.032,
     fontWeight: '600',
   },
   buttonTextFollowing: {
-    color: '#7A9AEC',
+    color: 'rgba(255, 255, 255, 0.8)',
   },
 });

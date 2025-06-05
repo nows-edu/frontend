@@ -24,27 +24,24 @@ export default function UserDisplay({ name, username, rightContent }: UserDispla
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
+const styles = StyleSheet.create({  container: {
     paddingHorizontal: SCREEN_WIDTH * 0.05,
-    paddingVertical: SCREEN_WIDTH * 0.01,
   },  nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
-    minHeight: 35,
+    minHeight: 32,
     flexWrap: 'nowrap',
   },  nameContainer: {
-    marginRight: SCREEN_WIDTH * 0.04, // Un poco más de espacio
-  },
-  rightContentContainer: {
+    marginRight: SCREEN_WIDTH * 0.06, // Un poco más de espacio
+  },  rightContentContainer: {
     marginLeft: 0,
-  },
-  name: {
-    fontSize: SCREEN_WIDTH * 0.045,
-    fontWeight: '700',
+    marginTop: SCREEN_WIDTH * 0.02,
+  },  name: {
+    fontSize: SCREEN_WIDTH * 0.04,
+    fontWeight: '600',
     color: 'white',
-    marginBottom: 2,
+    marginBottom: -4,
   },
   username: {
     fontSize: SCREEN_WIDTH * 0.03,

@@ -59,7 +59,7 @@ export default function Interests({
     container: {
       backgroundColor: '#000',
       marginHorizontal: SCREEN_WIDTH * 0.04,
-      marginTop: SCREEN_WIDTH * 0.02,
+      marginTop: SCREEN_WIDTH * 0.01,
       borderRadius: SCREEN_WIDTH * 0.02,
       padding: SCREEN_WIDTH * 0.03,
     },
