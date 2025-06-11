@@ -49,12 +49,11 @@ export default function TopBar({
             />
           </TouchableOpacity>
 
-          <View style={styles.rightContainer}>
-            <TouchableOpacity 
+          <View style={styles.rightContainer}>            <TouchableOpacity 
               style={styles.pointsContainer}
               onPress={() => navigateTo('/game')}
             >
-              <Ionicons name="bonfire" size={20} color="#007AFF" />
+              <Ionicons name="bonfire" size={20} color="rgb(239, 248, 255)" />
               <Text style={styles.pointsText}>{points}</Text>
             </TouchableOpacity>
             <IconButton
@@ -97,9 +96,10 @@ export default function TopBar({
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: { backgroundColor: 'transparent' },
-  wrapper: {
+const styles = StyleSheet.create({  safeArea: { 
+    backgroundColor: 'transparent',
+    width: '100%',
+  },  wrapper: {
     marginHorizontal: SCREEN_WIDTH * 0.035,
     position: 'relative',
   },  container: {
@@ -107,10 +107,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: SCREEN_WIDTH * 0.015,
+    paddingHorizontal: SCREEN_WIDTH * 0.025,
     paddingLeft: SCREEN_WIDTH * 0.04,
-    paddingRight: SCREEN_WIDTH * 0.02, // Menos padding a la derecha
     backgroundColor: 'rgba(25,25,25,0.6)',
-    borderRadius: SCREEN_WIDTH * 0.03,
+    borderRadius: SCREEN_WIDTH * 0.02,
+    width: '100%',
   },
   titleContainer: { flexDirection: 'row', alignItems: 'center' },
   title: {
@@ -119,17 +120,20 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginRight: SCREEN_WIDTH * 0.02,
   },
-  rightContainer: { flexDirection: 'row', alignItems: 'center' },
-  pointsContainer: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: 'white', borderRadius: SCREEN_WIDTH * 0.04,
-    paddingHorizontal: SCREEN_WIDTH * 0.025,
+  rightContainer: { flexDirection: 'row', alignItems: 'center' },  pointsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(44, 44, 44, 0.6)',
+    borderRadius: SCREEN_WIDTH * 0.04,
+    paddingHorizontal: SCREEN_WIDTH * 0.03,
     paddingVertical: SCREEN_WIDTH * 0.015,
     marginRight: SCREEN_WIDTH * 0.02,
   },
   pointsText: {
     marginLeft: SCREEN_WIDTH * 0.015,
-    color: '#007AFF', fontWeight: 'bold', fontSize: SCREEN_WIDTH * 0.035,
+    color: 'rgb(239, 248, 255)',
+    fontWeight: 'bold',
+    fontSize: SCREEN_WIDTH * 0.035,
   },
   icon: { marginHorizontal: SCREEN_WIDTH * 0.005 },
   dropdown: {

@@ -110,14 +110,13 @@ export default function ChatScreen() {
               />
             }
             contentStyle={styles.menuContent}
-          >
-            <Menu.Item 
+          >            <Menu.Item 
               onPress={() => {
                 setMenuVisible(false);
                 handleBlock();
               }} 
-              title={isBlocked ? "Desbloquear usuario" : "Bloquear usuario"}
-              leadingIcon="block"
+              title={isBlocked ? "Desbloquear" : "Bloquear"}
+              leadingIcon={() => <MaterialIcons name="not-interested" size={24} color="white" />}
               titleStyle={styles.menuItemText}
             />
             <Menu.Item
@@ -126,7 +125,7 @@ export default function ChatScreen() {
                 handleReport();
               }}
               title="Reportar"
-              leadingIcon="flag"
+              leadingIcon={() => <MaterialIcons name="flag" size={24} color="#FF4444" />}
               titleStyle={[styles.menuItemText, styles.reportText]}
             />
           </Menu>

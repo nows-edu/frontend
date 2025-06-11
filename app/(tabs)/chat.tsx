@@ -85,6 +85,7 @@ export default function ChatScreen() {
       <Header
         title="Los míos"
         points={1250}
+        onSearchPress={() => router.push('/search')}
       />
       
       <ScrollView style={styles.content}>
