@@ -8,29 +8,29 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 type ChatListProps = {
   chats: ChatListItem[];
-  onChatPress?: (chatId: string) => void;
 };
 
-export default function ChatList({ chats, onChatPress }: ChatListProps) {
-  const handlePress = (chatId: string) => {
-    if (onChatPress) {
-      onChatPress(chatId);
-    } else {
-      router.push({
-        pathname: '/chat',
-        params: { id: chatId }
-      });
-    }
+export default function ChatList({ chats }: ChatListProps) {  
+  const handlePress = (chat: ChatListItem) => {
+    console.log('Opening chat:', chat);
+    router.push({
+      pathname: '/conversation',
+      params: chat
+    });
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Mis chats</Text>
-      {chats.map((chat) => (
-        <Pressable
+      {chats.map((chat) => (        <Pressable
           key={chat.id}
-          style={styles.chatRow}
-          onPress={() => handlePress(chat.id)}
+          style={({ pressed }) => [
+            styles.chatRow,
+            pressed && { backgroundColor: 'rgba(255,255,255,0.05)' }
+          ]}
+          onPress={() => handlePress(chat)}
+          android_ripple={{color: 'rgba(255,255,255,0.1)'}}
+          hitSlop={20}
         >
           <View style={styles.avatarContainer}>
             <Image source={{ uri: chat.avatar }} style={styles.avatar} />

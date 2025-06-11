@@ -15,8 +15,7 @@ export default function SavedNowsButton({ onPress }: SavedNowsButtonProps) {  co
       onPress();
     } else {
       router.push({
-        pathname: '/(tabs)/home',
-        params: { view: 'saved' }
+        pathname: '/saved-nows'
       });
     }
   };

@@ -142,8 +142,10 @@ export default function ChatScreen() {
         <ScrollView 
           style={styles.messagesContainer}
           contentContainerStyle={styles.messagesContent}
-        >          {messages.map((msg) => (
-            <View key={msg.id} style={styles.messageContainer}>
+        >          {messages.map((msg) => (            <View key={msg.id} style={[
+                styles.messageWrapper,
+                msg.sender === 'me' && { alignSelf: 'flex-end' }
+              ]}>
               <View 
                 style={[
                   styles.messageBubble,
@@ -155,7 +157,11 @@ export default function ChatScreen() {
               <View style={[styles.messageInfo, msg.sender === 'me' ? styles.myMessageInfo : styles.otherMessageInfo]}>
                 <Text style={styles.timestamp}>{msg.timestamp}</Text>
                 {msg.sender === 'me' && (
-                  <Ionicons name="checkmark-done" size={16} color="rgba(255,255,255,0.5)" />
+                  <Ionicons 
+                    name="checkmark-done" 
+                    size={14} 
+                    color="rgba(255,255,255,0.5)" 
+                  />
                 )}
               </View>
             </View>
@@ -166,13 +172,11 @@ export default function ChatScreen() {
               <Text style={styles.blockedMessageText}>Has bloqueado a este usuario</Text>
             </View>
           )}
-        </ScrollView>
-
-        {!isBlocked ? (
+        </ScrollView>        {!isBlocked ? (
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
-              placeholder="Escribe un mensaje..."
+              placeholder="Mensaje"
               placeholderTextColor="rgba(255,255,255,0.4)"
               value={message}
               onChangeText={setMessage}
@@ -255,34 +259,34 @@ const styles = StyleSheet.create({
   messagesContent: {
     padding: SCREEN_WIDTH * 0.04,
     gap: SCREEN_WIDTH * 0.02,
-  },  messageContainer: {
-    marginVertical: SCREEN_WIDTH * 0.01,
-    maxWidth: '85%',
+  },  messageWrapper: {
+    maxWidth: '75%',
+    marginVertical: 1,
+    alignSelf: 'flex-start',
   },
   messageBubble: {
     padding: SCREEN_WIDTH * 0.025,
     borderRadius: SCREEN_WIDTH * 0.02,
   },
   myMessage: {
-    alignSelf: 'flex-end',
     backgroundColor: '#7A9AEC',
     borderBottomRightRadius: SCREEN_WIDTH * 0.005,
   },
   otherMessage: {
-    alignSelf: 'flex-start',
     backgroundColor: '#2a2a2a',
     borderBottomLeftRadius: SCREEN_WIDTH * 0.005,
   },
   messageText: {
     color: 'white',
     fontSize: SCREEN_WIDTH * 0.038,
+    lineHeight: SCREEN_WIDTH * 0.052,
   },
   messageInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    paddingHorizontal: 2,
     marginTop: 2,
-    paddingHorizontal: 4,
   },
   myMessageInfo: {
     alignSelf: 'flex-end',
@@ -296,21 +300,20 @@ const styles = StyleSheet.create({
   },  inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: SCREEN_WIDTH * 0.03,
+    paddingHorizontal: SCREEN_WIDTH * 0.04,
     paddingVertical: SCREEN_WIDTH * 0.02,
-    backgroundColor: '#1a1a2a',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(255,255,255,0.1)',
+    marginTop: -SCREEN_WIDTH * 0.02,
   },
   input: {
     flex: 1,
-    backgroundColor: '#2a2a2a',
-    borderRadius: SCREEN_WIDTH * 0.015,
-    paddingHorizontal: SCREEN_WIDTH * 0.03,
-    paddingVertical: SCREEN_WIDTH * 0.02,
     color: 'white',
     fontSize: SCREEN_WIDTH * 0.038,
-    maxHeight: SCREEN_WIDTH * 0.2,
+    maxHeight: SCREEN_WIDTH * 0.25,
+    paddingHorizontal: SCREEN_WIDTH * 0.035,
+    paddingVertical: SCREEN_WIDTH * 0.02,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    borderRadius: SCREEN_WIDTH * 0.02,
   },
   sendButton: {
     width: SCREEN_WIDTH * 0.1,

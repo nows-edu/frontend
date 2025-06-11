@@ -67,15 +67,16 @@ export default function ChatScreen() {
       pathname: '/(tabs)/profile',
       params: { userId }
     });
-  };
-
-  const handleSavedNowsPress = () => {
-    router.push('/(tabs)/home');
-  };
-
-  const handleChatPress = (chatId: string) => {      router.push({
+  };  const handleChatPress = (chat: ChatListItem) => {
+    router.push({
       pathname: '/chat',
-      params: { id: chatId }
+      params: { 
+        id: chat.id,
+        name: chat.name,
+        avatar: chat.avatar,
+        subtitle: chat.subtitle,
+        lastMessage: chat.lastMessage
+      }
     });
   };
 
@@ -91,21 +92,15 @@ export default function ChatScreen() {
           users={MOCK_RECENT_USERS}
           onUserPress={handleNowPress}
         />
-        
-        <SavedNowsButton 
-          onPress={handleSavedNowsPress}
-        />
+          <SavedNowsButton />
         
         <View style={styles.searchContainer}>
           <SearchBar            value={searchQuery}
             onChange={handleSearch}
             placeholder="Busca lo que apetezca..."
           />
-        </View>
-
-        <ChatList 
+        </View>        <ChatList 
           chats={filteredChats}
-          onChatPress={handleChatPress}
         />
       </ScrollView>
     </View>
