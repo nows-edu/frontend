@@ -5,6 +5,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface TagProps {
   label: string;
+  icon?: React.ReactNode;
   selected?: boolean;
   disabled?: boolean;
   selectable?: boolean;
@@ -15,6 +16,7 @@ interface TagProps {
 
 export default function Tag({
   label,
+  icon,
   selected = false,
   disabled = false,
   selectable = true,
@@ -31,29 +33,35 @@ export default function Tag({
         selected ? styles.tagSelected : styles.tagUnselected,
         disabled ? { opacity: 0.7 } : {},
         style
-      ]}
-      onPress={selectable ? onPress : undefined}
+      ]}      onPress={selectable ? onPress : undefined}
       disabled={disabled || !selectable}
     >
-      <Text 
-        style={[
-          styles.tagText,
-          selected ? styles.tagTextSelected : styles.tagTextUnselected,
-          textStyle
-        ]}
-      >
-        {label}
-      </Text>
+      <View style={styles.tagContentContainer}>
+        {icon}
+        {icon && <View style={{ width: SCREEN_WIDTH * 0.015 }} />}
+        <Text 
+          style={[
+            styles.tagText,
+            selected ? styles.tagTextSelected : styles.tagTextUnselected,
+            textStyle
+          ]}
+        >
+          {label}
+        </Text>
+      </View>
     </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  tag: {
+  tagContentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },  tag: {
     borderRadius: SCREEN_WIDTH * 0.06,
-    paddingHorizontal: SCREEN_WIDTH * 0.035,
-    paddingVertical: SCREEN_WIDTH * 0.013,
-    margin: SCREEN_WIDTH * 0.002,
+    paddingHorizontal: SCREEN_WIDTH * 0.025,
+    paddingVertical: SCREEN_WIDTH * 0.01,
+    margin: 0,
   },
   tagSelected: {
     backgroundColor: 'rgba(160, 187, 255, 0.32)',

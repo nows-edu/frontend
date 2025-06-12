@@ -8,11 +8,12 @@ type SearchBarProps = {
   value: string;
   onChange: (text: string) => void;
   placeholder?: string;
+  style?: object;
 };
 
-export default function SearchBar({ value, onChange, placeholder = "Buscar usuarios..." }: SearchBarProps) {
+export default function SearchBar({ value, onChange, placeholder = "Buscar usuarios...", style }: SearchBarProps) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]}>
       <Ionicons name="search" size={SCREEN_WIDTH * 0.045} color="rgba(255,255,255,0.6)" style={styles.icon} />
       <TextInput
         placeholder={placeholder}
@@ -44,9 +45,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: SCREEN_WIDTH * 0.05,
     paddingHorizontal: SCREEN_WIDTH * 0.035,
-    height: SCREEN_WIDTH * 0.085,
-    width: SCREEN_WIDTH * 0.93,
-    alignSelf: 'center',
+    height: SCREEN_WIDTH * 0.085,    flex: 1,
+    alignSelf: 'stretch',
     marginBottom: SCREEN_WIDTH * 0.03,
     marginTop: SCREEN_WIDTH * 0.02,
   },
