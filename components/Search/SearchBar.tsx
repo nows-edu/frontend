@@ -38,17 +38,15 @@ export default function SearchBar({ value, onChange, placeholder = "Buscar usuar
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
+const styles = StyleSheet.create({  container: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: SCREEN_WIDTH * 0.05,
     paddingHorizontal: SCREEN_WIDTH * 0.035,
-    height: SCREEN_WIDTH * 0.085,    flex: 1,
-    alignSelf: 'stretch',
-    marginBottom: SCREEN_WIDTH * 0.03,
-    marginTop: SCREEN_WIDTH * 0.02,
+    height: SCREEN_WIDTH * 0.085,
+    width: '100%',
+    opacity: 1
   },
   clearIcon: {
     marginLeft: SCREEN_WIDTH * 0.02,

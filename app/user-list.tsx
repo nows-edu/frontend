@@ -208,9 +208,9 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: 'rgba(255,255,255,0.1)',
-  },
-  searchContainer: {
+  },  searchContainer: {
     marginTop: SCREEN_WIDTH * 0.02,
+    marginHorizontal: SCREEN_WIDTH * 0.04,
   },
   content: {
     flex: 1,
