@@ -12,7 +12,7 @@ updates:
       - dependency-name: "@expo/*"
       - dependency-name: "react"
       - dependency-name: "react-dom"
-      - dependency-name: "react-native"
+      - dependency-name: "react-native*"
     open-pull-requests-limit: 5
     commit-message:
       prefix: "chore"

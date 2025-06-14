@@ -1,0 +1,48 @@
+name: Scheduled Expo Upgrade
+
+on:
+  schedule:
+    - cron: '0 0 1 * *' # Runs monthly, adjust as desired
+
+jobs:
+  expo-upgrade:
+    if: github.repository_owner == 'nows-edu' # Prevents forks from running this
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Expo CLI
+        run: npm install -g expo-cli
+
+      - name: Install dependencies compatibly
+        run: npx expo install
+
+      - name: Run expo upgrade (non-interactive)
+        run: npx expo upgrade --non-interactive
+
+      - name: Check for upgrade changes
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+          git diff --quiet || (
+            git checkout -b expo-upgrade-bot/${{ github.run_id }}
+            git add .
+            git commit -m "chore: run expo upgrade (automated)"
+            git push --set-upstream origin expo-upgrade-bot/${{ github.run_id }}
+          )
+
+      - name: Create PR if there are changes
+        if: |
+          ${{ github.ref == 'refs/heads/main' }} && (git rev-parse --verify expo-upgrade-bot/${{ github.run_id }} 2> /dev/null)
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: expo-upgrade-bot/${{ github.run_id }}
+          title: "chore: run expo upgrade (automated)"
+          body: "Automated Expo SDK upgrade - please review carefully before merging. Run `px expo upgrade` locally if additional changes are needed."
+          reviewers: JG03dev # Or your username
