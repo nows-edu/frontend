@@ -14,13 +14,10 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 16 # Change this if your Expo requires another version
+          node-version: 22 # Change this if your Expo requires another version
 
       - name: Install Expo CLI globally
-        run: npm install -g expo-cli
-
-      - name: Install using expo install for compatibility
-        run: npx expo install
+        run: npm install
 
       - name: Lint (Optional, if you have a lint script)
         run: npm run lint
