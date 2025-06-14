@@ -22,7 +22,8 @@ export default function RootLayout() {
     if (error) throw error;
   }, [error]);
 
-  useEffect(() => {    if (loaded) {
+  useEffect(() => {
+    if (loaded) {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
@@ -33,9 +34,12 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'light' ? DarkTheme : DefaultTheme}>
-      <PaperProvider>        <Stack screenOptions={{ headerShown: false }}>
+      <PaperProvider>
+        <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="game" />          <Stack.Screen name="search" />          <Stack.Screen name="user-list" />
+          <Stack.Screen name="game" />
+          <Stack.Screen name="search" />
+          <Stack.Screen name="user-list" />
           <Stack.Screen name="notifications" />
           <Stack.Screen name="conversation" options={{ headerShown: false }} />
           <Stack.Screen name="edit-info" options={{ presentation: 'modal' }}/>
