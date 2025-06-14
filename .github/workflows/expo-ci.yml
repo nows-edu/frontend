@@ -14,7 +14,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22 # Change this if your Expo requires another version
+          node-version: 16 # Change this if your Expo requires another version
 
       - name: Install Expo CLI globally
         run: npm install -g expo-cli
