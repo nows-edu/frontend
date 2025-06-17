@@ -1,5 +1,8 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+#Local content
+media/
+
 # dependencies
 node_modules/
 package-lock.json
