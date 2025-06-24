@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Dimensions, FlatList, StyleSheet, ViewToken } from 'react-native';
 import * as api from '../../services/api';
 import { MediaItem } from '../../types/media';
+import { useFeed } from '../../contexts/FeedContext';
 import MediaItemComponent from './MediaItem';
 
 interface NowsFeedProps {
@@ -11,6 +12,7 @@ interface NowsFeedProps {
 }
 
 export default function NowsFeed({ selectedCategories }: NowsFeedProps) {
+  const { feedItems, setFeedItems, addNewItem } = useFeed();
   const [nows, setNows] = useState<MediaItem[]>([]);
   const [page, setPage] = useState(1);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -20,6 +22,9 @@ export default function NowsFeed({ selectedCategories }: NowsFeedProps) {
   
   // Ref to prevent multiple fetches from firing simultaneously
   const isFetching = useRef(false);
+
+  // Combine fetched NOWs with new items from context
+  const allNows = [...feedItems, ...nows];
 
   const loadNows = useCallback(async (isInitialLoad = false) => {
     //
@@ -85,21 +90,30 @@ export default function NowsFeed({ selectedCategories }: NowsFeedProps) {
 
   return (
     <FlatList
-      data={nows}
+      data={allNows}
       renderItem={renderItem}
       keyExtractor={(item) => item.id}
-      pagingEnabled
+      pagingEnabled={true}
       snapToInterval={Dimensions.get('window').height}
+      snapToAlignment="start"
       decelerationRate="fast"
       showsVerticalScrollIndicator={false}
+      bounces={false}
+      scrollEventThrottle={16}
+      disableIntervalMomentum={true}
       onEndReached={() => loadNows(false)}
       onEndReachedThreshold={0.7}
       ListFooterComponent={renderFooter}
       onRefresh={handleRefresh}
       refreshing={isRefreshing}
       onViewableItemsChanged={onViewableItemsChanged}
-      viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
+      viewabilityConfig={{ itemVisiblePercentThreshold: 80 }}
       style={styles.container}
+      getItemLayout={(data, index) => ({
+        length: Dimensions.get('window').height,
+        offset: Dimensions.get('window').height * index,
+        index,
+      })}
     />
   );
 }

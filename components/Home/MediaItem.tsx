@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { VideoView, useVideoPlayer } from 'expo-video';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Author, MediaItem as MediaItemType } from '../../types/media';
@@ -45,24 +45,65 @@ interface MediaItemProps {
 const VideoPlayer = ({ uri, isVisible }: { uri: string, isVisible: boolean }) => {
   const player = useVideoPlayer(uri, (player) => {
     player.loop = true;
-    player.muted = false; // Videos will have sound
+    player.muted = true; // Start muted for autoplay compliance
+    player.playbackRate = 1.0;
   });
 
+  const isVisibleRef = useRef(isVisible);
+  const playerRef = useRef(player);
+  
   useEffect(() => {
-    if (isVisible) {
-      player.play();
-    } else {
-      player.pause();
-      player.seekBy(0); // Rewind when it goes off-screen
-    }
+    isVisibleRef.current = isVisible;
+    playerRef.current = player;
   }, [isVisible, player]);
 
-  // Clean up the player when the component unmounts
   useEffect(() => {
-    return () => player.pause();
-  }, [player]);
+    const handlePlayback = () => {
+      try {
+        if (isVisible && playerRef.current) {
+          // Small delay to ensure the component is ready
+          setTimeout(() => {
+            if (isVisibleRef.current && playerRef.current) {
+              playerRef.current.play();
+            }
+          }, 100);
+        } else if (playerRef.current) {
+          playerRef.current.pause();
+          // Reset to beginning when pausing
+          playerRef.current.currentTime = 0;
+        }
+      } catch (error) {
+        // Silently handle playback errors
+        console.log('Video playback error (non-critical):', error);
+      }
+    };
 
-  return <VideoView player={player} style={styles.media} nativeControls={false} />;
+    handlePlayback();
+  }, [isVisible]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      try {
+        if (playerRef.current) {
+          playerRef.current.pause();
+        }
+      } catch (error) {
+        // Silent cleanup
+      }
+    };
+  }, []);
+
+  return (
+    <VideoView 
+      player={player} 
+      style={styles.media} 
+      nativeControls={false}
+      allowsFullscreen={false}
+      contentFit="cover"
+      showsTimecodes={false}
+    />
+  );
 };
 
 const ImageViewer = ({ uri }: { uri: string }) => (
@@ -131,7 +172,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginRight: 20,
     textShadowColor: 'rgba(0, 0, 0, 0.75)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2,
-  }
+  },
 });
 
 export default React.memo(MediaItem); // Memoize for performance

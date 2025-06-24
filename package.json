@@ -45,7 +45,8 @@
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
     "use-debounce": "^10.0.4",
-    "expo-video": "~2.2.1"
+    "expo-video": "~2.2.1",
+    "@react-native-picker/picker": "2.11.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

@@ -1,35 +1,19 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View, TouchableOpacity, Text } from 'react-native';
+import { useRouter } from 'expo-router';
 import NowsFeed from '../../components/Home/NowsFeed';
 import TopBar from '../../components/Home/TopBar';
+import * as api from '../../services/api';
 
-
-
-// Simulated API functions
-const fetchCategoriesFromAPI = async () => {
-  // Simulating API request with a delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return ['Retos', 'Opiniones', 'Usuarios', 'Clubes', 'Comunidades', 'Actividades'];
-};
-
-const fetchSelectedCategoriesFromAPI = async () => {
-  // Simulating API request with a delay
-  await new Promise(resolve => setTimeout(resolve, 300));
-  return ['Populares', 'Nuevos'];
-};
-
-const updateSelectedCategoriesInAPI = async (categories: string[]) => {
-  // Simulating API request with a delay
-  await new Promise(resolve => setTimeout(resolve, 700));
-  console.log('Categories updated in backend:', categories);
-  return true;
-};
+// Mock user ID - in a real app this would come from authentication
+const CURRENT_USER_ID = 'current-user-123';
 
 export default function HomeScreen() {
   const [filterOptions, setFilterOptions] = useState<string[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const router = useRouter();
 
   // Load categories data on component mount
   useEffect(() => {
@@ -37,8 +21,8 @@ export default function HomeScreen() {
       setIsLoading(true);
       try {
         const [categories, selected] = await Promise.all([
-          fetchCategoriesFromAPI(),
-          fetchSelectedCategoriesFromAPI()
+          api.fetchCategories(),
+          api.fetchSelectedCategories(CURRENT_USER_ID)
         ]);
         setFilterOptions(categories);
         setSelectedOptions(selected);
@@ -66,7 +50,7 @@ export default function HomeScreen() {
     
     try {
       // Send update to backend
-      await updateSelectedCategoriesInAPI(newSelectedOptions);
+      await api.updateSelectedCategories(newSelectedOptions, CURRENT_USER_ID);
     } catch (error) {
       console.error('Error updating categories:', error);
       // Revert to previous state if API call fails
@@ -93,6 +77,13 @@ export default function HomeScreen() {
           />
         )}
       </View>
+
+      <TouchableOpacity 
+        style={styles.createButton}
+        onPress={() => router.push('/create-now')}
+      >
+        <Text style={styles.createButtonText}>+ NOW</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -108,5 +99,19 @@ const styles = StyleSheet.create({
     right: 0,
     // The background is transparent, so it floats over the feed
   },
-
+  createButton: {
+    position: 'absolute',
+    bottom: 40,
+    right: 20,
+    backgroundColor: '#FF6B6B',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 25,
+    zIndex: 1000,
+  },
+  createButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
 });

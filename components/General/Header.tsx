@@ -32,7 +32,8 @@ export default function ProfileHeader({
   onSearchPress = () => {},
   rightIcon = 'menu',
   onRightPress = () => {},
-}: ProfileHeaderProps) {  return (
+}: ProfileHeaderProps) {
+  return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         {/* Title */}

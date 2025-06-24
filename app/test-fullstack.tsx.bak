@@ -1,0 +1,222 @@
+import React, { useState, useEffect } from 'react';
+import { View, Text, Button, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import * as api from '../services/api';
+
+export default function FullStackTestScreen() {
+  const [testResults, setTestResults] = useState<string[]>([]);
+  const [isRunning, setIsRunning] = useState(false);
+  const [feedData, setFeedData] = useState<any[]>([]);
+
+  const addResult = (message: string) => {
+    setTestResults(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
+  };
+
+  const runFullStackTest = async () => {
+    setIsRunning(true);
+    setTestResults([]);
+    addResult('🧪 Starting Full-Stack Frontend Test...');
+
+    try {
+      // Test 1: Fetch NOWs
+      addResult('1️⃣ Testing NOWs Feed...');
+      const feedResult = await api.fetchNows(1);
+      if (feedResult.data.length > 0) {
+        addResult(`✅ Feed loaded: ${feedResult.data.length} NOWs`);
+        setFeedData(feedResult.data.slice(0, 3)); // Show first 3 for display
+      } else {
+        addResult('⚠️ Feed loaded but empty');
+      }
+
+      // Test 2: Create NOW
+      addResult('2️⃣ Testing NOW Creation...');
+      const testUrl = `https://picsum.photos/400/600?test=${Date.now()}`;
+      const createResult = await api.createNow(testUrl, 'Reto', 1);
+      if (createResult.success) {
+        addResult(`✅ NOW created successfully: ID ${createResult.now?.id}`);
+      } else {
+        addResult(`❌ NOW creation failed: ${createResult.error}`);
+      }
+
+      // Test 3: Vote on NOW
+      if (feedResult.data.length > 0) {
+        addResult('3️⃣ Testing NOW Voting...');
+        const firstNowId = feedResult.data[0].id;
+        const voteResult = await api.voteNow(parseInt(firstNowId), 1, true);
+        if (voteResult.success) {
+          addResult(`✅ Vote successful on NOW ${firstNowId}`);
+        } else {
+          addResult(`❌ Vote failed: ${voteResult.error}`);
+        }
+      }
+
+      // Test 4: Upload with URL
+      addResult('4️⃣ Testing Upload API...');
+      const uploadResult = await api.uploadNowUrl(testUrl, 'Actividad', 1);
+      if (uploadResult.success) {
+        addResult(`✅ Upload successful: ID ${uploadResult.now?.id}`);
+      } else {
+        addResult(`❌ Upload failed: ${uploadResult.error}`);
+      }
+
+      // Test 5: Refresh feed
+      addResult('5️⃣ Testing Feed Refresh...');
+      const refreshResult = await api.fetchNows(1);
+      addResult(`📊 Updated feed count: ${refreshResult.data.length} NOWs`);
+
+      addResult('🎉 All tests completed!');
+
+    } catch (error) {
+      addResult(`❌ Test error: ${error}`);
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
+  const clearResults = () => {
+    setTestResults([]);
+    setFeedData([]);
+  };
+
+  return (
+    <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Full-Stack Test Dashboard</Text>
+        <Text style={styles.subtitle}>NOWs Frontend ↔ Backend Integration</Text>
+      </View>
+
+      <View style={styles.controls}>
+        <Button 
+          title={isRunning ? "Running Tests..." : "Run Full-Stack Test"} 
+          onPress={runFullStackTest}
+          disabled={isRunning}
+        />
+        <Button title="Clear Results" onPress={clearResults} />
+      </View>
+
+      {isRunning && (
+        <View style={styles.loading}>
+          <ActivityIndicator size="large" color="#7A9AEC" />
+          <Text>Running tests...</Text>
+        </View>
+      )}
+
+      <View style={styles.results}>
+        <Text style={styles.sectionTitle}>Test Results:</Text>
+        {testResults.map((result, index) => (
+          <Text key={index} style={styles.resultText}>
+            {result}
+          </Text>
+        ))}
+      </View>
+
+      {feedData.length > 0 && (
+        <View style={styles.feedSample}>
+          <Text style={styles.sectionTitle}>Sample Feed Data:</Text>
+          {feedData.map((item, index) => (
+            <View key={index} style={styles.feedItem}>
+              <Text style={styles.feedItemText}>
+                ID: {item.id} | Type: {item.type} | Likes: {item.likes}
+              </Text>
+              <Text style={styles.feedItemText} numberOfLines={1}>
+                {item.text}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      <View style={styles.info}>
+        <Text style={styles.infoTitle}>API Endpoints Being Tested:</Text>
+        <Text style={styles.infoText}>• GET /api/nows/feed</Text>
+        <Text style={styles.infoText}>• POST /api/nows</Text>
+        <Text style={styles.infoText}>• POST /api/nows/:id/vote</Text>
+        <Text style={styles.infoText}>• POST /api/upload/now/url</Text>
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    padding: 20,
+  },
+  header: {
+    marginBottom: 20,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 5,
+  },
+  controls: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 20,
+  },
+  loading: {
+    alignItems: 'center',
+    padding: 20,
+  },
+  results: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  resultText: {
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 5,
+    fontFamily: 'monospace',
+  },
+  feedSample: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  feedItem: {
+    backgroundColor: '#f8f8f8',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  feedItemText: {
+    fontSize: 12,
+    color: '#333',
+  },
+  info: {
+    backgroundColor: '#e8f4fd',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  infoTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 3,
+  },
+});

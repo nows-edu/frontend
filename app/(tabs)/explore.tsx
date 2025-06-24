@@ -7,18 +7,20 @@ import { useCameraPermissions } from 'expo-image-picker';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useState } from 'react';
 import { Dimensions, Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
+import { Challenge as ChallengeType } from '@/types/challenges';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Material icons type for type safety
 type MaterialIconName = keyof typeof MaterialIcons.glyphMap;
 
-type ChallengeType = 'photo' | 'video';
+type LocalChallengeType = 'photo' | 'video';
 
-interface Challenge {
+interface LocalChallenge {
   id: string;
   title: string;
-  type: ChallengeType;
+  type: LocalChallengeType;
   icon: string;
 }
 
@@ -30,7 +32,7 @@ const FILTERS: Array<{label: string, icon?: MaterialIconName}> = [
 ];
 
 // Weekly challenges data
-const WEEKLY_CHALLENGES: Challenge[] = [
+const WEEKLY_CHALLENGES: LocalChallenge[] = [
   {
     id: '1',
     title: 'Foto en la universidad',
@@ -52,7 +54,7 @@ const WEEKLY_CHALLENGES: Challenge[] = [
 ];
 
 // University-related challenges
-const UNIVERSITY_CHALLENGES: Challenge[] = [
+const UNIVERSITY_CHALLENGES: LocalChallenge[] = [
   {
     id: '4',
     title: 'Tips para el primer día',
@@ -77,14 +79,34 @@ export default function ExploreScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
-  const [randomChallenge, setRandomChallenge] = useState<Challenge | null>(null);
-  const [showRandomModal, setShowRandomModal] = useState(false);  const handleParticipate = useCallback(async () => {
+  const [randomChallenge, setRandomChallenge] = useState<LocalChallenge | null>(null);
+  const [showRandomModal, setShowRandomModal] = useState(false);  const handleParticipate = useCallback(async (challenge?: LocalChallenge) => {
     const { status } = await requestPermission();
     if (status !== 'granted') {
       // TODO: Mostrar mensaje de error
       return;
     }
-    // TODO: Abrir la cámara
+    
+    if (challenge) {
+      // Convert LocalChallenge to ChallengeType for navigation
+      const challengeData: ChallengeType = {
+        id: challenge.id,
+        title: challenge.title,
+        type: challenge.type,
+        icon: challenge.icon,
+      };
+      
+      // Navigate to create-now with challenge context
+      router.push({
+        pathname: '/create-now',
+        params: {
+          challengeData: JSON.stringify(challengeData),
+        },
+      });
+    } else {
+      // Navigate to create-now without challenge context
+      router.push('/create-now');
+    }
   }, [requestPermission]);
 
   const handleRandomChallenge = useCallback(() => {
@@ -139,7 +161,7 @@ export default function ExploreScreen() {
               key={challenge.id}
               title={challenge.title}
               type={challenge.type}
-              onParticipate={handleParticipate}
+              onParticipate={() => handleParticipate(challenge)}
             />
           ))}
         </ScrollView>        <Text style={styles.sectionTitle}>Sobre tu universidad</Text>
@@ -150,7 +172,7 @@ export default function ExploreScreen() {
               title={challenge.title}
               type={challenge.type}
               imageUrl="https://images.pexels.com/photos/267885/pexels-photo-267885.jpeg"
-              onParticipate={handleParticipate}
+              onParticipate={() => handleParticipate(challenge)}
             />
           ))}
         </View>
@@ -200,7 +222,7 @@ export default function ExploreScreen() {
                   <Pressable 
                     style={[styles.modalButton, styles.participateButton]}
                     onPress={() => {
-                      handleParticipate();
+                      handleParticipate(randomChallenge || undefined);
                       setShowRandomModal(false);
                     }}
                   >
