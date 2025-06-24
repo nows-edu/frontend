@@ -37,7 +37,7 @@ export default function TopBar({
   const topInset = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0;
 
   return (
-    <SafeAreaView style={[styles.safeArea, { paddingTop: topInset }]}>      
+    <SafeAreaView style={[styles.safeArea, { paddingTop: topInset }]}>
       <View style={styles.wrapper}>
         <View style={styles.container}>
           <TouchableOpacity style={styles.titleContainer} onPress={() => setExpanded(v => !v)}>
@@ -49,7 +49,8 @@ export default function TopBar({
             />
           </TouchableOpacity>
 
-          <View style={styles.rightContainer}>            <TouchableOpacity 
+          <View style={styles.rightContainer}>
+            <TouchableOpacity 
               style={styles.pointsContainer}
               onPress={() => navigateTo('/game')}
             >
@@ -79,7 +80,8 @@ export default function TopBar({
               <Text style={styles.subtitle}>Selecciona lo que te recomendamos:</Text>
               {isUpdating && <ActivityIndicator size="small" color="#7A9AEC" style={styles.indicator} />}
             </View>
-            <View style={styles.tagsWrapper}>              {filterOptions.map(option => (
+            <View style={styles.tagsWrapper}>
+              {filterOptions.map(option => (
                 <Tag
                   key={option}
                   label={option}

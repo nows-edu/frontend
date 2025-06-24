@@ -82,10 +82,12 @@ export default function ProfileScreen() {
   const [status, setStatus] = useState('Estudiante');
   const [statusColor, setStatusColor] = useState('rgb(88, 101, 242)');
   const [profileImage, setProfileImage] = useState('');
-  const [isFirstLoad, setIsFirstLoad] = useState(true);  const [education, setEducation] = useState('');
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const [education, setEducation] = useState('');
   const [degree, setDegree] = useState('');
   const [location, setLocation] = useState('');
-  const [selectedTab, setSelectedTab] = useState<TabOption>('nows');  const [careerItems, setCareerItems] = useState<Array<{ year: string; achievement: string; description?: string; }>>([]);
+  const [selectedTab, setSelectedTab] = useState<TabOption>('nows');
+  const [careerItems, setCareerItems] = useState<Array<{ year: string; achievement: string; description?: string; }>>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followerCount, setFollowerCount] = useState(0);

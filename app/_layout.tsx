@@ -7,6 +7,7 @@ import { PaperProvider } from 'react-native-paper';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { FeedProvider } from '@/contexts/FeedContext';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -22,7 +23,8 @@ export default function RootLayout() {
     if (error) throw error;
   }, [error]);
 
-  useEffect(() => {    if (loaded) {
+  useEffect(() => {
+    if (loaded) {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
@@ -32,19 +34,25 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'light' ? DarkTheme : DefaultTheme}>
-      <PaperProvider>        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="game" />          <Stack.Screen name="search" />          <Stack.Screen name="user-list" />
-          <Stack.Screen name="notifications" />
-          <Stack.Screen name="conversation" options={{ headerShown: false }} />
-          <Stack.Screen name="edit-info" options={{ presentation: 'modal' }}/>
-          <Stack.Screen name="edit-interests" options={{ presentation: 'modal' }} />
-          <Stack.Screen name="profile" />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-      </PaperProvider>
-    </ThemeProvider>
+    <FeedProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <PaperProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="game" />
+            <Stack.Screen name="search" />
+            <Stack.Screen name="user-list" />
+            <Stack.Screen name="notifications" />
+            <Stack.Screen name="conversation" options={{ headerShown: false }} />
+            <Stack.Screen name="edit-info" options={{ presentation: 'modal' }}/>
+            <Stack.Screen name="edit-interests" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="profile" />
+            <Stack.Screen name="create-now" options={{ headerShown: true, title: 'Create NOW' }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style="auto" />
+        </PaperProvider>
+      </ThemeProvider>
+    </FeedProvider>
   );
 }

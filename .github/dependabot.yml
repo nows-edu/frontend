@@ -1,15 +1,24 @@
 version: 2
 updates:
   - package-ecosystem: "npm"
-    directory: "/" # Root of the repo
+    directory: "/"
     schedule:
-      interval: "weekly"  # Or "daily"
+      interval: "monthly"
     allow:
       - dependency-type: "direct"
-      - dependency-name: "expo" # Focus on Expo & SDK if you want
+    ignore:
+      - dependency-name: "expo"
+      - dependency-name: "expo-*"
+      - dependency-name: "@expo/*"
+      - dependency-name: "react"
+      - dependency-name: "react-dom"
+      - dependency-name: "react-native*"
     open-pull-requests-limit: 5
     commit-message:
       prefix: "chore"
       include: "scope"
     reviewers:
-      - JG03dev   # Optional: ask a team member to always review
+      - JG03dev
+    labels:
+      - "dependencies"
+      - "utility"
