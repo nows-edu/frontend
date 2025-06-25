@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const TAB_BAR_HEIGHT = Math.min(SCREEN_HEIGHT * 0.1, 80);
 const ICON_SIZE = Math.min(SCREEN_WIDTH * 0.07, 30);
-const CENTER_BUTTON_SIZE = Math.min(SCREEN_WIDTH * 0.16, 65);
+const CENTER_BUTTON_SIZE = Math.min(SCREEN_WIDTH * 0.14, 50);
 
 // Colores del tema
 const COLORS = {
@@ -47,11 +47,14 @@ function GradientTabBarBackground() {
 function CenterButton({ focused }: { focused: boolean }) {
   return (
     <View style={styles.centerButtonWrapper}>
-      <View style={[styles.centerButton, { backgroundColor: '#FFFFFF' }]}>
+      <View style={[
+        styles.centerButton,
+        focused && { backgroundColor: '#82A9FF' } // Color azul más claro cuando está activo
+      ]}>
         <MaterialIcons 
           name="add" 
           size={CENTER_BUTTON_SIZE * 0.5} 
-          color="#000000" 
+          color={focused ? 'white' : '#000000'}
         />
       </View>
     </View>
@@ -110,36 +113,35 @@ const styles = StyleSheet.create({  tabBar: {
     shadowRadius: 4,
     borderTopWidth: 0,
     borderTopColor: 'transparent',
+    alignItems: 'center',
   },
   tabBarBg: {
     flex: 1,
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
+    width: '100%',
   },
   centerButtonWrapper: {
     alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: -CENTER_BUTTON_SIZE * 0.01,
+    justifyContent: 'flex-end',
+    height: TAB_BAR_HEIGHT,
+    paddingBottom: 16,
   },
   centerButton: {
     width: CENTER_BUTTON_SIZE,
-    height: CENTER_BUTTON_SIZE,
-    borderRadius: CENTER_BUTTON_SIZE / 2,
+    height: CENTER_BUTTON_SIZE * 0.75,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 8,
+    backgroundColor: 'white',
   },
   iconWrapper: {
-    height: TAB_BAR_HEIGHT * 0.9,
+    height: TAB_BAR_HEIGHT,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingBottom: TAB_BAR_HEIGHT * 0.05,
+    justifyContent: 'flex-end',
+    paddingBottom: 16,
   },
   icon: {
-    marginTop: TAB_BAR_HEIGHT * 0.25,
+    alignSelf: 'center',
   },
 });

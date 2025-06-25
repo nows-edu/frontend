@@ -2,16 +2,32 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Dimensions, FlatList, StyleSheet, ViewToken } from 'react-native';
+import { useFeed } from '../../contexts/FeedContext';
 import * as api from '../../services/api';
 import { MediaItem } from '../../types/media';
-import { useFeed } from '../../contexts/FeedContext';
 import MediaItemComponent from './MediaItem';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const TAB_BAR_HEIGHT = 80;
+const TOP_BAR_HEIGHT = 60;
+const ITEM_HEIGHT = SCREEN_HEIGHT - (TAB_BAR_HEIGHT + TOP_BAR_HEIGHT);
 
 interface NowsFeedProps {
   selectedCategories: string[]; // Receives filter from HomeScreen
+  onItemChange?: (item: MediaItem) => void;
 }
 
-export default function NowsFeed({ selectedCategories }: NowsFeedProps) {
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'black',
+  },
+  loader: {
+    paddingVertical: 20,
+  },
+});
+
+export default function NowsFeed({ selectedCategories, onItemChange }: NowsFeedProps) {
   const { feedItems, setFeedItems, addNewItem } = useFeed();
   const [nows, setNows] = useState<MediaItem[]>([]);
   const [page, setPage] = useState(1);
@@ -71,60 +87,70 @@ export default function NowsFeed({ selectedCategories }: NowsFeedProps) {
     }
   };
 
-  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
-    const visibleIds = viewableItems.map(item => item.key as string).filter(Boolean);
-    setVisibleItems(visibleIds);
-  }).current;
+  const renderItem = useCallback(({ item, index }: { item: MediaItem, index: number }) => {
+    console.log('Rendering item:', { id: item.id, mediaType: item.mediaType, uri: item.uri });
+    
+    return (
+      <MediaItemComponent 
+        item={{
+          ...item,
+          mediaType: item.mediaType || (item.uri?.includes('.mp4') ? 'video' : 'image'),
+          contentType: item.contentType || 'opinion',
+        }} 
+        isVisible={visibleItems.includes(item.id)}
+      />
+    );
+  }, [visibleItems]);
 
-  const renderItem = useCallback(
-    ({ item }: { item: MediaItem }) => (
-      <MediaItemComponent item={item} isVisible={visibleItems.includes(item.id)} />
-    ),
-    [visibleItems]
-  );
-  
+  const onViewableItemsChanged = useCallback(({ viewableItems }: { viewableItems: ViewToken[] }) => {
+    setVisibleItems(viewableItems.map(item => item.key as string));
+    // Notificar el cambio de item visible
+    if (viewableItems.length > 0 && onItemChange) {
+      onItemChange(viewableItems[0].item as MediaItem);
+    }
+  }, [onItemChange]);
+
+  const viewabilityConfig = {
+    itemVisiblePercentThreshold: 50,
+    minimumViewTime: 300,
+  };
+
+  const viewabilityConfigCallbackPairs = useRef([{
+    viewabilityConfig,
+    onViewableItemsChanged,
+  }]);
+
   const renderFooter = () => {
     if (!isLoadingMore || isRefreshing) return null;
-    return <ActivityIndicator style={styles.footer} size="large" color="#FFF" />;
+    return <ActivityIndicator style={styles.loader} size="large" color="#FFF" />;
   };
 
   return (
     <FlatList
+      style={styles.container}
       data={allNows}
       renderItem={renderItem}
       keyExtractor={(item) => item.id}
-      pagingEnabled={true}
-      snapToInterval={Dimensions.get('window').height}
-      snapToAlignment="start"
-      decelerationRate="fast"
-      showsVerticalScrollIndicator={false}
-      bounces={false}
-      scrollEventThrottle={16}
-      disableIntervalMomentum={true}
-      onEndReached={() => loadNows(false)}
-      onEndReachedThreshold={0.7}
-      ListFooterComponent={renderFooter}
-      onRefresh={handleRefresh}
+      onEndReached={() => loadNows()}
+      onEndReachedThreshold={0.1}
       refreshing={isRefreshing}
-      onViewableItemsChanged={onViewableItemsChanged}
-      viewabilityConfig={{ itemVisiblePercentThreshold: 80 }}
-      style={styles.container}
-      getItemLayout={(data, index) => ({
-        length: Dimensions.get('window').height,
-        offset: Dimensions.get('window').height * index,
+      onRefresh={handleRefresh}
+      getItemLayout={(_, index) => ({
+        length: SCREEN_HEIGHT,
+        offset: SCREEN_HEIGHT * index,
         index,
       })}
+      onViewableItemsChanged={onViewableItemsChanged}
+      viewabilityConfig={viewabilityConfig}
+      showsVerticalScrollIndicator={false}
+      snapToInterval={SCREEN_HEIGHT}
+      snapToAlignment="start"
+      decelerationRate="fast"
+      ListFooterComponent={
+        isLoadingMore ? (
+          <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
+        ) : null
+      }
     />
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'black',
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 40,
-    alignSelf: 'center',
-  },
-});

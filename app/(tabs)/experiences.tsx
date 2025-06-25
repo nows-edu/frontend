@@ -68,7 +68,7 @@ export default function ExperiencesScreen() {
     <SafeAreaView style={styles.container}>
       <Header 
         title="Experiencias"
-        points={780}
+        points={180}
         onSearchPress={() => {}}
       />
       

@@ -1,14 +1,15 @@
-
 export interface Author {
   id: string;
   name: string;
   avatarUri: string;
+  status?: string;
 }
 
 export interface MediaItem {
   id: string;
-  type: 'video' | 'image';
-  uri: string; // URL for the video or image
+  mediaType: 'video' | 'image';
+  contentType: 'challenge' | 'opinion';
+  uri: string;
   text: string;
   author: Author;
   likes: number;
@@ -23,12 +24,13 @@ export interface NowCreator {
   name: string;
   username: string;
   profileImage?: string;
+  status?: string;
 }
 
 export interface NowItem {
   id: number;
   url_content: string;
-  type: string; // Reto, Opiniones, Actividad, etc.
+  type: string;
   created_at: string;
   creator: NowCreator;
   votesCount: number;

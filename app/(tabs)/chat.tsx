@@ -84,7 +84,7 @@ export default function ChatScreen() {
     <View style={styles.container}>
       <Header
         title="Los míos"
-        points={1250}
+        points={180}
         onSearchPress={() => router.push('/search')}
       />
       

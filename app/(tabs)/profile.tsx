@@ -346,7 +346,7 @@ export default function ProfileScreen() {
     <View style={styles.container}>
       <Header
         title="Perfil"
-        points={1250}
+        points={180}
         onSearchPress={() => router.push('/search')}
         rightIcon="settings"
         onRightPress={() => console.log('Settings pressed')}

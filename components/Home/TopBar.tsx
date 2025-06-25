@@ -125,7 +125,7 @@ const styles = StyleSheet.create({  safeArea: {
   rightContainer: { flexDirection: 'row', alignItems: 'center' },  pointsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(44, 44, 44, 0.6)',
+    backgroundColor: 'rgba(25, 25, 25, 0.8)',
     borderRadius: SCREEN_WIDTH * 0.04,
     paddingHorizontal: SCREEN_WIDTH * 0.03,
     paddingVertical: SCREEN_WIDTH * 0.015,
