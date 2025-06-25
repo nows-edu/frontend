@@ -25,16 +25,17 @@ type ProfileStatsProps = {
   onPressVisits?: () => void;
 };
 
-export default function ProfileStats({
-  following = 0,
-  followers = 0,
-  visits = 0,
-  showBackground = true,
-  userId,
-  onPressFollowing,
-  onPressFollowers,
-  onPressVisits,
-}: ProfileStatsProps) {
+export default function ProfileStats(props: ProfileStatsProps) {
+  const {
+    following = 0,
+    followers = 0,
+    visits = 0,
+    showBackground = true,
+    userId,
+    onPressFollowing,
+    onPressFollowers,
+    onPressVisits
+  } = props;
   const handlePress = (type: 'following' | 'followers' | 'visits') => {
     if (!userId) return;
 

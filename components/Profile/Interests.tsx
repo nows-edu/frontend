@@ -14,11 +14,12 @@ type InterestsProps = {
   isEditable?: boolean;
 };
 
-export default function Interests({ 
-  items = [],
-  statusColor = '#7A9AEC',
-  isEditable = true
-}: InterestsProps) {
+export default function Interests(props: InterestsProps) {
+  const {
+    items = [],
+    statusColor = '#7A9AEC',
+    isEditable = true
+  } = props;
   const [interests, setInterests] = React.useState(items);
 
   React.useEffect(() => {

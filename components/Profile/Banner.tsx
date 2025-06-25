@@ -21,14 +21,15 @@ type ProfileBannerProps = {
   isEditable?: boolean;
 };
 
-export default function ProfileBanner({
-  statusText = '',
-  statusColor = 'rgb(88, 101, 242)',
-  onStatusChange = () => {},
-  imageUri = '',
-  onImageChange = () => {},
-  isEditable = true,
-}: ProfileBannerProps) {
+export default function ProfileBanner(props: ProfileBannerProps) {
+  const {
+    statusText = '',
+    statusColor = 'rgb(88, 101, 242)',
+    onStatusChange = () => {},
+    imageUri = '',
+    onImageChange = () => {},
+    isEditable = true
+  } = props;
   const theme = useTheme();
   const [editVisible, setEditVisible] = useState(false);
   const [tempStatus, setTempStatus] = useState(statusText);

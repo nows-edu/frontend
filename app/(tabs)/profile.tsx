@@ -290,12 +290,15 @@ export default function ProfileScreen() {
               <View style={{ width: 40 }} />
             </View>
             <View style={styles.divider} />
-          </SafeAreaView>          <ScrollView style={styles.content}>            <ProfileBanner
+          </SafeAreaView>
+          <ScrollView style={styles.content}>
+            <ProfileBanner
               statusText={otherUserProfile.status}
               statusColor={otherUserProfile.statusColor}
               imageUri={otherUserProfile.avatarUrl}
               isEditable={false}
-            />            <UserDisplay
+            />
+            <UserDisplay
               name={otherUserProfile.name}
               username={otherUserProfile.username}
               rightContent={
@@ -322,7 +325,8 @@ export default function ProfileScreen() {
               items={otherUserProfile.interests}
               statusColor={otherUserProfile.statusColor}
               isEditable={false}
-            />            <TabSlider 
+            />
+            <TabSlider 
               onTabChange={setSelectedTab}
               initialTab={selectedTab}
               tabs={tabs}
@@ -332,7 +336,8 @@ export default function ProfileScreen() {
               }}
             />
             
-            {selectedTab === 'nows' ? (              <EmptyNows isOwnProfile={false} />
+            {selectedTab === 'nows' ? (
+              <EmptyNows isOwnProfile={false} />
             ) : (
               <Career items={otherUserProfile.career} color={otherUserProfile.statusColor} />
             )}
@@ -350,7 +355,9 @@ export default function ProfileScreen() {
         onSearchPress={() => router.push('/search')}
         rightIcon="settings"
         onRightPress={() => console.log('Settings pressed')}
-      />      <ScrollView style={styles.content}>        <ProfileBanner
+      />
+      <ScrollView style={styles.content}>
+        <ProfileBanner
           statusText={status}
           statusColor={statusColor}
           imageUri={profileImage}
@@ -361,17 +368,20 @@ export default function ProfileScreen() {
         <UserDisplay
           name="Carol B.G."
           username="carool.bg"
-        />          <ProfileStats
+        />
+        <ProfileStats
           following={followingCount}
           followers={followerCount}
           visits={visitCount}
           showBackground={false}
           userId={currentUserId}
-        /><ProfileInfo
+        />
+        <ProfileInfo
           items={[
             { type: 'education', text: education || degree },
             { type: 'location', text: location }
-          ]}          isEditable={true}
+          ]}
+          isEditable={true}
         />
         <Interests
           statusColor={statusColor}
@@ -387,8 +397,10 @@ export default function ProfileScreen() {
           }}
         />
         {selectedTab === 'nows' ? (
-          <EmptyNows />        ) : selectedTab === 'career' ? (
-          <>            <Career 
+          <EmptyNows />
+        ) : selectedTab === 'career' ? (
+          <>
+            <Career 
               items={careerItems} 
               color={statusColor}
               isEditable={true}
@@ -398,7 +410,8 @@ export default function ProfileScreen() {
               }}
               onEditItem={handleEditCareerItem}
               onDeleteItem={handleDeleteCareerItem}
-            />            <CareerModal
+            />
+            <CareerModal
               visible={isModalVisible}
               onClose={() => {
                 setIsModalVisible(false);

@@ -39,7 +39,8 @@ export default function ProfileHeader({
         {/* Title */}
         <Text style={styles.title}>{title}</Text>
 
-        <View style={styles.rightContainer}>          {/* Points bubble */}
+        <View style={styles.rightContainer}>
+          {/* Points bubble */}
           <TouchableOpacity 
             style={styles.pointsContainer}
             onPress={() => router.push('/game')}

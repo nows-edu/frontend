@@ -21,14 +21,15 @@ type CareerProps = {
   onDeleteItem?: (index: number) => void;
 };
 
-export default function Career({ 
-  items, 
-  color, 
-  isEditable, 
-  onAddItem, 
-  onEditItem, 
-  onDeleteItem 
-}: CareerProps) {
+export default function Career(props: CareerProps) {
+  const {
+    items,
+    color,
+    isEditable,
+    onAddItem,
+    onEditItem,
+    onDeleteItem
+  } = props;
   const [expandedIndex, setExpandedIndex] = React.useState<number | null>(null);
   const animationsMap = React.useRef<Map<number, Animated.Value>>(new Map());
 

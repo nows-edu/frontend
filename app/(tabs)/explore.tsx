@@ -2,13 +2,13 @@ import UniversityChallenge from '@/components/Explore/UniversityChallenge';
 import WeeklyChallenge from '@/components/Explore/WeeklyChallenge';
 import Tag from '@/components/General/Tag';
 import SearchBar from '@/components/Search/SearchBar';
+import { Challenge as ChallengeType } from '@/types/challenges';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useCameraPermissions } from 'expo-image-picker';
+import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useState } from 'react';
 import { Dimensions, Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
-import { Challenge as ChallengeType } from '@/types/challenges';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -128,7 +128,8 @@ export default function ExploreScreen() {
             onChange={setSearchQuery}
             placeholder="Buscar challenges, categorías, etc..."
             style={styles.searchBar}
-          />          <Pressable style={styles.diceButton} onPress={handleRandomChallenge}>
+          />
+          <Pressable style={styles.diceButton} onPress={handleRandomChallenge}>
             <MaterialIcons name="casino" size={24} color="white" />
           </Pressable>
         </View>
@@ -137,7 +138,8 @@ export default function ExploreScreen() {
           horizontal 
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.filtersContainer}
-        >          {FILTERS.map((filter) => (
+        >
+          {FILTERS.map((filter) => (
             <Tag
               key={filter.label}
               label={filter.label}

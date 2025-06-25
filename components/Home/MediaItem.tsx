@@ -117,21 +117,63 @@ const ActionButtons = ({ likes, comments, showComments, onToggleComments }: Acti
 };
 
 // Bottom Profile Section Component
-const BottomSection = ({ author, contentType }: { author: Author, contentType: 'challenge' | 'opinion' }) => {
+const BottomSection = ({ item }: { item: MediaItemType }) => {
   const navigateToProfile = () => {
     router.push({
       pathname: '/(tabs)/profile',
-      params: { userId: author.id }
+      params: { userId: item.author.id }
     });
   };
 
   const handleParticipate = () => {
     router.push({
       pathname: '/create-now',
-      params: { type: contentType }
+      params: { type: item.contentType }
     });
   };
 
+  // Si es un perfil de usuario, mostrar información diferente
+  if (item.contentType === 'user-profile' && item.profileData) {
+    return (
+      <View style={styles.bottomSection}>
+        <TouchableOpacity 
+          style={styles.profileButton}
+          onPress={navigateToProfile}
+          activeOpacity={0.9}
+        >
+          <Image 
+            source={{ uri: item.author.avatarUri }} 
+            style={styles.bottomAvatar}
+          />
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileName} numberOfLines={1}>
+              {item.author.name}
+            </Text>
+            <Text style={[styles.profileStatus, { color: item.profileData.statusColor || '#fff' }]} numberOfLines={1}>
+              {item.profileData.status}
+            </Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.followButton}
+          onPress={navigateToProfile}
+          activeOpacity={0.9}
+        >
+          <MaterialIcons 
+            name="person-add" 
+            size={22} 
+            color="white" 
+          />
+          <Text style={styles.participateText}>
+            Ver perfil
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // Para contenido normal (retos, opiniones, etc.)
   return (
     <View style={styles.bottomSection}>
       <TouchableOpacity 
@@ -140,15 +182,15 @@ const BottomSection = ({ author, contentType }: { author: Author, contentType: '
         activeOpacity={0.9}
       >
         <Image 
-          source={{ uri: author.avatarUri }} 
+          source={{ uri: item.author.avatarUri }} 
           style={styles.bottomAvatar}
         />
         <View style={styles.profileInfo}>
           <Text style={styles.profileName} numberOfLines={1}>
-            {author.name}
+            {item.author.name}
           </Text>
           <Text style={styles.profileStatus} numberOfLines={1}>
-            {author.status || 'Disponible'}
+            {item.author.status || 'Disponible'}
           </Text>
         </View>
       </TouchableOpacity>
@@ -159,7 +201,7 @@ const BottomSection = ({ author, contentType }: { author: Author, contentType: '
         activeOpacity={0.9}
       >
         <MaterialIcons 
-          name={contentType === 'challenge' ? "mic" : "flash-on"} 
+          name={item.contentType === 'challenge' ? "mic" : "flash-on"} 
           size={22} 
           color="white" 
         />
@@ -180,7 +222,7 @@ const MediaOverlay = ({ item, topPadding, bottomPadding }: { item: MediaItemType
       showComments={false}
       onToggleComments={() => {}}
     />
-    <BottomSection author={item.author} contentType={item.contentType} />
+    <BottomSection item={item} />
   </View>
 );
 
@@ -190,6 +232,7 @@ interface MediaItemProps {
 }
 
 const VideoPlayer = ({ uri, isVisible }: { uri: string, isVisible: boolean }) => {
+  const [hasVideoError, setHasVideoError] = useState(false);
   const player = useVideoPlayer(uri, (player) => {
     player.loop = true;
     player.muted = true; // Start muted for autoplay compliance
@@ -205,13 +248,18 @@ const VideoPlayer = ({ uri, isVisible }: { uri: string, isVisible: boolean }) =>
   }, [isVisible, player]);
 
   useEffect(() => {
-    const handlePlayback = () => {
+    const handlePlayback = async () => {
       try {
-        if (isVisible && playerRef.current) {
+        if (isVisible && playerRef.current && !hasVideoError) {
           // Small delay to ensure the component is ready
-          setTimeout(() => {
+          setTimeout(async () => {
             if (isVisibleRef.current && playerRef.current) {
-              playerRef.current.play();
+              try {
+                await playerRef.current.play();
+              } catch (playError) {
+                console.log('Video play error, fallback to image:', playError);
+                setHasVideoError(true);
+              }
             }
           }, 100);
         } else if (playerRef.current) {
@@ -220,13 +268,14 @@ const VideoPlayer = ({ uri, isVisible }: { uri: string, isVisible: boolean }) =>
           playerRef.current.currentTime = 0;
         }
       } catch (error) {
-        // Silently handle playback errors
+        // Silently handle playback errors and fallback to image
         console.log('Video playback error (non-critical):', error);
+        setHasVideoError(true);
       }
     };
 
     handlePlayback();
-  }, [isVisible]);
+  }, [isVisible, hasVideoError]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -240,6 +289,20 @@ const VideoPlayer = ({ uri, isVisible }: { uri: string, isVisible: boolean }) =>
       }
     };
   }, []);
+
+  // If video has error, fallback to image
+  if (hasVideoError) {
+    return (
+      <Image
+        source={{ uri: 'https://picsum.photos/id/1043/1080/1920' }} // Default university image
+        style={styles.media}
+        resizeMode="cover"
+        onError={() => {
+          console.log('Image fallback also failed');
+        }}
+      />
+    );
+  }
 
   return (
     <VideoView 
@@ -298,8 +361,23 @@ const MediaItem = ({ item, isVisible }: MediaItemProps) => {
             {item.text}
           </Text>
         )}
+
+        {/* Información especial para perfiles de usuario */}
+        {item.contentType === 'user-profile' && item.profileData && (
+          <View style={styles.profileInfoOverlay}>
+            <Text style={styles.profileEducation}>{item.profileData.education}</Text>
+            <Text style={styles.profileLocation}>📍 {item.profileData.location}</Text>
+            <View style={styles.profileInterests}>
+              {item.profileData.interests.map((interest, index) => (
+                <View key={index} style={styles.interestTag}>
+                  <Text style={styles.interestText}>{interest}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
         
-        <BottomSection author={item.author} contentType={item.contentType} />
+        <BottomSection item={item} />
 
         <CommentsSection 
           isVisible={showComments}
@@ -648,6 +726,15 @@ const styles = StyleSheet.create({
     height: '100%',
     minWidth: 130,
   },
+  followButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 24,
+    paddingHorizontal: 20,
+    height: '100%',
+    minWidth: 130,
+  },
   participateText: {
     color: 'white',
     fontSize: 15,
@@ -803,6 +890,43 @@ const styles = StyleSheet.create({
   },
   sendButtonDisabled: {
     backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+  profileInfoOverlay: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    bottom: TAB_BAR_HEIGHT + 140, // Encima del caption normal
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: 16,
+    borderRadius: 16,
+    zIndex: 1,
+  },
+  profileEducation: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  profileLocation: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 14,
+    marginBottom: 12,
+  },
+  profileInterests: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  interestTag: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  interestText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '500',
   },
 });
 

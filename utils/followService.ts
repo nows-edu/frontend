@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Mock de usuarios iniciales
-export const MOCK_USERS = {  'carol': {
+export const MOCK_USERS = {
+  'carol': {
     id: 'carol',
     name: 'Carol B.G.',
     username: 'carool.bg',
@@ -27,7 +28,97 @@ export const MOCK_USERS = {  'carol': {
     followers: [],
     following: [],
     visits: []
-  }
+  },
+  'u1': {
+    id: 'u1',
+    name: 'Elena García',
+    username: 'elena_g',
+    avatarUrl: 'https://i.pravatar.cc/150?u=elena',
+    followers: [],
+    following: [],
+    visits: []
+  },
+  'u2': {
+    id: 'u2',
+    name: 'Carlos López',
+    username: 'carlos_l',
+    avatarUrl: 'https://i.pravatar.cc/150?u=carlos',
+    followers: [],
+    following: [],
+    visits: []
+  },
+  'u3': {
+    id: 'u3',
+    name: 'Ana Martínez',
+    username: 'ana_m',
+    avatarUrl: 'https://i.pravatar.cc/150?u=ana',
+    followers: [],
+    following: [],
+    visits: []
+  },
+  'u4': {
+    id: 'u4',
+    name: 'Miguel Torres',
+    username: 'miguel_t',
+    avatarUrl: 'https://i.pravatar.cc/150?u=miguel',
+    followers: [],
+    following: [],
+    visits: []
+  },
+  'u5': {
+    id: 'u5',
+    name: 'Laura Sánchez',
+    username: 'laura_s',
+    avatarUrl: 'https://i.pravatar.cc/150?u=laura',
+    followers: [],
+    following: [],
+    visits: []
+  },
+  'u6': {
+    id: 'u6',
+    name: 'Diego Ruiz',
+    username: 'diego_r',
+    avatarUrl: 'https://i.pravatar.cc/150?u=diego',
+    followers: [],
+    following: [],
+    visits: []
+  },
+  'u7': {
+    id: 'u7',
+    name: 'Sofia Pérez',
+    username: 'sofia_p',
+    avatarUrl: 'https://i.pravatar.cc/150?u=sofia',
+    followers: [],
+    following: [],
+    visits: []
+  },
+  'u8': {
+    id: 'u8',
+    name: 'Javier Morales',
+    username: 'javier_m',
+    avatarUrl: 'https://i.pravatar.cc/150?u=javier',
+    followers: [],
+    following: [],
+    visits: []
+  },
+  'u9': {
+    id: 'u9',
+    name: 'Carmen Flores',
+    username: 'carmen_f',
+    avatarUrl: 'https://i.pravatar.cc/150?u=carmen',
+    followers: [],
+    following: [],
+    visits: []
+  },
+  'u10': {
+    id: 'u10',
+    name: 'Roberto Silva',
+    username: 'roberto_s',
+    avatarUrl: 'https://i.pravatar.cc/150?u=roberto',
+    followers: [],
+    following: [],
+    visits: []
+  },
 };
 
 export type User = {

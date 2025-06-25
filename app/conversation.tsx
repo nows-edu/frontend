@@ -141,7 +141,9 @@ export default function ChatScreen() {
         <ScrollView 
           style={styles.messagesContainer}
           contentContainerStyle={styles.messagesContent}
-        >          {messages.map((msg) => (            <View key={msg.id} style={[
+        >
+          {messages.map((msg) => (
+            <View key={msg.id} style={[
                 styles.messageWrapper,
                 msg.sender === 'me' && { alignSelf: 'flex-end' }
               ]}>

@@ -49,6 +49,7 @@ export default function UserRow({
     if (onPress) {
       onPress();
     } else {
+      // Asegurar que navega al perfil externo correcto
       router.push(`/profile?userId=${id}`);
     }
   };

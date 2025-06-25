@@ -270,14 +270,17 @@ export default function UniversityProfileScreen() {
           statusColor="#4CAF50"
           imageUri="https://images.pexels.com/photos/267885/pexels-photo-267885.jpeg"
           isEditable={false}
-        />        <View style={styles.profileInfo}>
+        />
+        <View style={styles.profileInfo}>
           <Text style={styles.name}>U. Autónoma de Barcelona</Text>
           <Text style={styles.username}>@UAB</Text>
-        </View>        <Stats
+        </View>
+        <Stats
           following={3000}
           followers={30000}
           visits={50000}
-          showBackground={false}          onPressFollowing={() => {}}
+          showBackground={false}
+          onPressFollowing={() => {}}
           onPressFollowers={() => {}}
           onPressVisits={() => {}}
         />
