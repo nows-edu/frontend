@@ -13,7 +13,7 @@ import { followService } from '@/utils/followService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { Dimensions, Platform, ScrollView, StyleSheet, View } from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -25,17 +25,20 @@ const CURRENT_USER_PROFILE = {
   statusColor: 'rgb(250, 38, 38)',
   avatarUrl: 'https://i.pravatar.cc/150?img=1',
   interests: ['Tecnología', 'Apps', 'Música'],
+  education: 'Ingeniería Informática - UPC',
+  degree: 'Grado en Ingeniería Informática',
+  location: 'Barcelona, España',
 };
 
 export default function ProfileScreen() {
   // Estado para el perfil del usuario actual
-  const [status, setStatus] = useState('Estudiante');
-  const [statusColor, setStatusColor] = useState('rgb(88, 101, 242)');
-  const [profileImage, setProfileImage] = useState('');
+  const [status, setStatus] = useState(CURRENT_USER_PROFILE.status);
+  const [statusColor, setStatusColor] = useState(CURRENT_USER_PROFILE.statusColor);
+  const [profileImage, setProfileImage] = useState(CURRENT_USER_PROFILE.avatarUrl);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
-  const [education, setEducation] = useState('');
-  const [degree, setDegree] = useState('');
-  const [location, setLocation] = useState('');
+  const [education, setEducation] = useState(CURRENT_USER_PROFILE.education);
+  const [degree, setDegree] = useState(CURRENT_USER_PROFILE.degree);
+  const [location, setLocation] = useState(CURRENT_USER_PROFILE.location);
   const [selectedTab, setSelectedTab] = useState<TabOption>('nows');
   const [careerItems, setCareerItems] = useState<Array<{ year: string; achievement: string; description?: string; }>>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -116,11 +119,22 @@ export default function ProfileScreen() {
       }
 
       if (savedStatus) setStatus(savedStatus);
+      else setStatus(CURRENT_USER_PROFILE.status);
+      
       if (savedColor) setStatusColor(savedColor);
+      else setStatusColor(CURRENT_USER_PROFILE.statusColor);
+      
       if (savedImage) setProfileImage(savedImage);
+      else setProfileImage(CURRENT_USER_PROFILE.avatarUrl);
+      
       if (savedEducation) setEducation(savedEducation);
+      else setEducation(CURRENT_USER_PROFILE.education);
+      
       if (savedDegree) setDegree(savedDegree);
+      else setDegree(CURRENT_USER_PROFILE.degree);
+      
       if (savedLocation) setLocation(savedLocation);
+      else setLocation(CURRENT_USER_PROFILE.location);
       if (savedCareerItems) {
         setCareerItems(JSON.parse(savedCareerItems));
       }
@@ -135,9 +149,12 @@ export default function ProfileScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      // Asegurar que estamos en el perfil propio
+      console.log('ProfileScreen focused - loading own profile data');
       loadProfileData();
+      loadFollowStats();
       setRefreshKey(prev => prev + 1); // Force component refresh
-    }, [])
+    }, [loadFollowStats])
   );
 
   const handleStatusChange = async (newStatus: string, newColor: string) => {
@@ -190,10 +207,12 @@ export default function ProfileScreen() {
             isEditable={true}
           />
           <UserDisplay
+            key={`user-display-${refreshKey}`}
             name={CURRENT_USER_PROFILE.name}
             username={CURRENT_USER_PROFILE.username}
           />
           <ProfileStats
+            key={`stats-${refreshKey}`}
             following={followingCount}
             followers={followerCount}
             visits={visitCount}
@@ -202,9 +221,9 @@ export default function ProfileScreen() {
           <ProfileInfo
             key={`info-${refreshKey}`}
             items={[
-              { type: 'education', text: education },
-              { type: 'degree', text: degree },
-              { type: 'location', text: location }
+              { type: 'education', text: education || CURRENT_USER_PROFILE.education },
+              { type: 'degree', text: degree || CURRENT_USER_PROFILE.degree },
+              { type: 'location', text: location || CURRENT_USER_PROFILE.location }
             ]}
             isEditable={true}
           />
@@ -247,6 +266,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
+    paddingTop: Platform.OS === 'android' ? 80 : 60, // Más padding para bajar todo el contenido aún más
   },
   content: {
     flex: 1,

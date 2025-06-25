@@ -58,13 +58,15 @@ export default function ProfileHeader({
             onPress={onSearchPress}
           />
 
-          {/* Rightmost button */}          <MaterialIcons
-            name="menu"
-            size={28}
-            color="white"
-            style={[styles.icon, { padding: 8 }]}
-            onPress={onRightPress}
-          />
+          {/* Rightmost button */}
+          <TouchableOpacity onPress={onRightPress}>
+            <MaterialIcons
+              name="menu"
+              size={28}
+              color="white"
+              style={[styles.icon, { padding: 8 }]}
+            />
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>

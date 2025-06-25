@@ -20,7 +20,7 @@ export default function Interests(props: InterestsProps) {
     statusColor = '#7A9AEC',
     isEditable = true
   } = props;
-  const [interests, setInterests] = React.useState<InterestItem[]>([]);
+  const [interests, setInterests] = React.useState<InterestItem[]>(items.length > 0 ? items : ['Tecnología', 'Apps', 'Música']);
 
   React.useEffect(() => {
     if (isEditable) {
@@ -47,10 +47,16 @@ export default function Interests(props: InterestsProps) {
     try {
       const saved = await AsyncStorage.getItem('userInterests');
       if (saved) {
-        setInterests(JSON.parse(saved));
+        const savedInterests = JSON.parse(saved);
+        setInterests(savedInterests.length > 0 ? savedInterests : items);
+      } else {
+        // Si no hay datos guardados, usar los items de las props como fallback
+        setInterests(items.length > 0 ? items : ['Tecnología', 'Apps', 'Música']);
       }
     } catch (error) {
       console.error('Error loading interests:', error);
+      // En caso de error, usar los items de las props o valores por defecto
+      setInterests(items.length > 0 ? items : ['Tecnología', 'Apps', 'Música']);
     }
   };
 
