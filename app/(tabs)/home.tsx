@@ -19,6 +19,7 @@ export default function HomeScreen() {
     statement: 'Enseña el spot más infravalorado de tu biblioteca universitaria',
     profileData: undefined as any
   });
+  const [isDropdownExpanded, setIsDropdownExpanded] = useState(false);
   const router = useRouter();
 
   // Load categories data on component mount
@@ -79,7 +80,7 @@ export default function HomeScreen() {
               if (item.contentType === 'user-profile' && item.profileData) {
                 setCurrentStatement({
                   type: 'Usuario',
-                  statement: item.author.name, // Usar el nombre como "statement"
+                  statement: item.author.name,
                   profileData: {
                     education: item.profileData.education,
                     location: item.profileData.location,
@@ -94,7 +95,6 @@ export default function HomeScreen() {
                   profileData: undefined
                 });
               } else {
-                // Limpiar el statement para contenido sin statement
                 setCurrentStatement({
                   type: 'Reto',
                   statement: '',
@@ -110,9 +110,10 @@ export default function HomeScreen() {
               selectedOptions={selectedOptions}
               onOptionToggle={handleOptionToggle}
               isUpdating={isUpdating}
+              onExpandChange={setIsDropdownExpanded}
             />
-            {/* Solo mostrar DynamicIsland si el item actual tiene contenido válido */}
-            {currentStatement.statement && (
+            {/* Solo mostrar DynamicIsland si no está expandido el dropdown y hay contenido válido */}
+            {!isDropdownExpanded && currentStatement.statement && (
               <DynamicIsland
                 type={currentStatement.type}
                 statement={currentStatement.statement}

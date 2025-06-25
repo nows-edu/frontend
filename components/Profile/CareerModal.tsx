@@ -1,3 +1,4 @@
+import { CareerItem } from '@/types/career';
 import React, { useState } from 'react';
 import { Dimensions, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
@@ -6,10 +7,10 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 type CareerModalProps = {
   visible: boolean;
   onClose: () => void;
-  onSave: (item: { year: string; achievement: string; description: string }) => void;
+  onSave: (item: CareerItem) => void;
   onDelete?: () => void;
   color: string;
-  initialValues?: { year: string; achievement: string; description?: string };
+  initialValues?: CareerItem;
   isEditing?: boolean;
 };
 
@@ -23,13 +24,26 @@ export default function CareerModal({
   isEditing
 }: CareerModalProps) {
   const [year, setYear] = useState(initialValues?.year || '');
+  const [university, setUniversity] = useState(initialValues?.university || '');
+  const [universityAcronym, setUniversityAcronym] = useState(initialValues?.universityAcronym || '');
+  const [degree, setDegree] = useState(initialValues?.degree || '');
   const [achievement, setAchievement] = useState(initialValues?.achievement || '');
   const [description, setDescription] = useState(initialValues?.description || '');
 
   const handleSave = () => {
-    if (year && achievement) {
-      onSave({ year, achievement, description });
+    if (year && university && universityAcronym && degree && achievement) {
+      onSave({ 
+        year, 
+        university,
+        universityAcronym,
+        degree,
+        achievement,
+        description 
+      });
       setYear('');
+      setUniversity('');
+      setUniversityAcronym('');
+      setDegree('');
       setAchievement('');
       setDescription('');
       onClose();
@@ -46,9 +60,9 @@ export default function CareerModal({
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>
-            {isEditing ? 'Editar logro académico' : 'Nuevo logro académico'}
+            {isEditing ? 'Editar experiencia académica' : 'Nueva experiencia académmica'}
           </Text>
-          
+
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Año</Text>
             <TextInput
@@ -58,30 +72,67 @@ export default function CareerModal({
               placeholder="Ej: 2025"
               placeholderTextColor="rgba(255,255,255,0.4)"
               keyboardType="numeric"
+              maxLength={4}
             />
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Logro</Text>
+            <Text style={styles.label}>Universidad</Text>
+            <TextInput
+              style={[styles.input, { borderColor: color }]}
+              value={university}
+              onChangeText={setUniversity}
+              placeholder="Ej: Universidad Politécnica de Catalunya"
+              placeholderTextColor="rgba(255,255,255,0.4)"
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Acrónimo Universidad</Text>
+            <TextInput
+              style={[styles.input, { borderColor: color }]}
+              value={universityAcronym}
+              onChangeText={setUniversityAcronym}
+              placeholder="Ej: UPC"
+              placeholderTextColor="rgba(255,255,255,0.4)"
+              autoCapitalize="characters"
+              maxLength={10}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Título o Grado</Text>
+            <TextInput
+              style={[styles.input, { borderColor: color }]}
+              value={degree}
+              onChangeText={setDegree}
+              placeholder="Ej: Grado en Ingeniería Informática"
+              placeholderTextColor="rgba(255,255,255,0.4)"
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Logro o Especialización</Text>
             <TextInput
               style={[styles.input, { borderColor: color }]}
               value={achievement}
               onChangeText={setAchievement}
-              placeholder="Ej: Graduación en Ingeniería"
+              placeholder="Ej: Especialización en Software y Mobile"
               placeholderTextColor="rgba(255,255,255,0.4)"
             />
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Descripción (opcional)</Text>
+            <Text style={styles.label}>Descripción</Text>
             <TextInput
               style={[styles.input, styles.textArea, { borderColor: color }]}
               value={description}
               onChangeText={setDescription}
-              placeholder="Describe tu logro..."
+              placeholder="Describe tu experiencia..."
               placeholderTextColor="rgba(255,255,255,0.4)"
               multiline
               numberOfLines={4}
+              textAlignVertical="top"
             />
           </View>          <View style={styles.buttonContainer}>
             {isEditing && (

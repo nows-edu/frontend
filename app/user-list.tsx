@@ -66,12 +66,10 @@ const UserListScreen = () => {
   const handleToggleFollow = async (targetUserId: string) => {
     try {
       const userToUpdate = users.find(u => u.id === targetUserId);
-      if (!userToUpdate) return;
-
-      if (userToUpdate.isFollowing) {
-        await followService.unfollowUser(currentUserId, targetUserId);
+      if (!userToUpdate) return;        if (userToUpdate.isFollowing) {
+        await followService.unfollowUser(targetUserId);
       } else {
-        await followService.followUser(currentUserId, targetUserId);
+        await followService.followUser(targetUserId);
       }
 
       setUsers(prev => 

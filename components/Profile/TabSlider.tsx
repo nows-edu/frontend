@@ -14,10 +14,10 @@ type Props = {
   };
 };
 
-const DEFAULT_TABS: TabOption[] = ['nows', 'agenda'];
+const DEFAULT_TABS: TabOption[] = ['nows', 'career', 'agenda'];
 const DEFAULT_LABELS: { [key in TabOption]: string } = {
-  nows: 'Mis Nows',
-  agenda: 'Agenda',
+  nows: 'Nows',
+  agenda: 'AgenSolda',
   career: 'Trayectoria'
 };
 

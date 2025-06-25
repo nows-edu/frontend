@@ -1,17 +1,53 @@
-import React from 'react';
+import { followService } from '@/utils/followService';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, Pressable, StyleSheet, Text } from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-type FollowButtonProps = {
-  isFollowing: boolean;
-  onToggleFollow: () => void;
+export type FollowButtonProps = {
+  userId: string;
+  isFollowing?: boolean;
+  onToggleFollow?: () => void;
   style?: any;
   disabled?: boolean;
   loading?: boolean;
 };
 
-export default function FollowButton({ isFollowing, onToggleFollow, style, disabled, loading }: FollowButtonProps) {
+export default function FollowButton({ userId, style, disabled: externalDisabled }: FollowButtonProps) {
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const disabled = externalDisabled || loading;
+
+  useEffect(() => {
+    loadFollowStatus();
+  }, [userId]);
+
+  const loadFollowStatus = async () => {
+    try {
+      const status = await followService.getFollowStatus(userId);
+      setIsFollowing(status);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error loading follow status:', error);
+      setLoading(false);
+    }
+  };
+
+  const handleToggleFollow = async () => {
+    setLoading(true);
+    try {
+      if (isFollowing) {
+        await followService.unfollowUser(userId);
+      } else {
+        await followService.followUser(userId);
+      }
+      setIsFollowing(!isFollowing);
+    } catch (error) {
+      console.error('Error toggling follow:', error);
+    }
+    setLoading(false);
+  };
+
   return (
     <Pressable
       style={[
@@ -20,8 +56,8 @@ export default function FollowButton({ isFollowing, onToggleFollow, style, disab
         disabled && styles.buttonDisabled,
         style
       ]}
-      onPress={onToggleFollow}
-      disabled={disabled || loading}
+      onPress={handleToggleFollow}
+      disabled={disabled}
     >
       {loading ? (
         <ActivityIndicator size="small" color={isFollowing ? "#FFFFFF" : "#000000"} />

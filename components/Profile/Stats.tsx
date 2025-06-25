@@ -57,14 +57,7 @@ export default function ProfileStats(props: ProfileStatsProps) {
 
   return (
     <View
-      style={[
-        styles.container,
-        showBackground && {
-          backgroundColor: 'rgba(255,255,255,0.05)',
-          padding: SCREEN_WIDTH * 0.03,
-          borderRadius: SCREEN_WIDTH * 0.02,
-        },
-      ]}
+      style={styles.container}
     >
       <Pressable
         style={styles.statColumn}

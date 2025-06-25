@@ -1,7 +1,21 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+export type User = {
+  id: string;
+  name: string;
+  username: string;
+  avatarUrl: string;
+  followers: string[];
+  following: string[];
+  visits: string[];
+};
+
+type Users = {
+  [key: string]: User;
+};
+
 // Mock de usuarios iniciales
-export const MOCK_USERS = {
+export const MOCK_USERS: Users = {
   'carol': {
     id: 'carol',
     name: 'Carol B.G.',
@@ -121,15 +135,7 @@ export const MOCK_USERS = {
   },
 };
 
-export type User = {
-  id: string;
-  name: string;
-  username: string;
-  avatarUrl: string;
-  followers: string[];
-  following: string[];
-  visits: string[];
-};
+// Interface has been moved to the top of the file
 
 class FollowService {
   async allUsers(): Promise<Record<string, User>> {
@@ -158,80 +164,126 @@ class FollowService {
     }
   }
 
-  async followUser(followerId: string, followedId: string): Promise<void> {
-    const users = await this.getUsers();
-    
-    // Actualizar seguidores del usuario seguido
-    if (!users[followedId].followers.includes(followerId)) {
-      users[followedId].followers.push(followerId);
+  async getFollowStatus(targetUserId: string): Promise<boolean> {
+    try {
+      const currentUserId = await AsyncStorage.getItem('currentUserId') || 'carol';
+      const currentUser = MOCK_USERS[currentUserId];
+      return currentUser.following.includes(targetUserId);
+    } catch (error) {
+      console.error('Error checking follow status:', error);
+      return false;
     }
-    
-    // Actualizar seguidos del usuario que sigue
-    if (!users[followerId].following.includes(followedId)) {
-      users[followerId].following.push(followedId);
-    }
-    
-    await this.saveUsers(users);
   }
 
-  async unfollowUser(followerId: string, followedId: string): Promise<void> {
-    const users = await this.getUsers();
-    
-    // Remover de seguidores
-    users[followedId].followers = users[followedId].followers.filter(id => id !== followerId);
-    
-    // Remover de seguidos
-    users[followerId].following = users[followerId].following.filter(id => id !== followedId);
-    
-    await this.saveUsers(users);
+  async followUser(targetUserId: string): Promise<void> {
+    try {
+      const currentUserId = await AsyncStorage.getItem('currentUserId') || 'carol';
+      const currentUser = MOCK_USERS[currentUserId];
+      if (!currentUser.following.includes(targetUserId)) {
+        currentUser.following.push(targetUserId);
+        MOCK_USERS[targetUserId].followers.push(currentUserId);
+      }
+    } catch (error) {
+      console.error('Error following user:', error);
+    }
+  }
+
+  async unfollowUser(targetUserId: string): Promise<void> {
+    try {
+      const currentUserId = await AsyncStorage.getItem('currentUserId') || 'carol';
+      const currentUser = MOCK_USERS[currentUserId];
+      currentUser.following = currentUser.following.filter(id => id !== targetUserId);
+      MOCK_USERS[targetUserId].followers = MOCK_USERS[targetUserId].followers.filter(id => id !== currentUserId);
+    } catch (error) {
+      console.error('Error unfollowing user:', error);
+    }
   }
 
   async getFollowers(userId: string): Promise<User[]> {
-    const users = await this.getUsers();
-    const user = users[userId];
-    return user.followers.map(id => users[id]);
+    try {
+      const users = await this.getUsers();
+      const user = users[userId];
+      if (!user) return [];
+      return user.followers.map(id => users[id]).filter(Boolean);
+    } catch (error) {
+      console.error('Error getting followers:', error);
+      return [];
+    }
   }
 
   async getFollowing(userId: string): Promise<User[]> {
-    const users = await this.getUsers();
-    const user = users[userId];
-    return user.following.map(id => users[id]);
+    try {
+      const users = await this.getUsers();
+      const user = users[userId];
+      if (!user) return [];
+      return user.following.map(id => users[id]).filter(Boolean);
+    } catch (error) {
+      console.error('Error getting following:', error);
+      return [];
+    }
   }
 
   async isFollowing(followerId: string, followedId: string): Promise<boolean> {
-    const users = await this.getUsers();
-    return users[followerId].following.includes(followedId);
+    try {
+      const users = await this.getUsers();
+      const follower = users[followerId];
+      if (!follower) return false;
+      return follower.following.includes(followedId);
+    } catch (error) {
+      console.error('Error checking following status:', error);
+      return false;
+    }
   }
 
   async getUserStats(userId: string): Promise<{ followers: number; following: number; visits: number }> {
-    const users = await this.getUsers();
-    const user = users[userId];
-    return {
-      followers: user.followers.length,
-      following: user.following.length,
-      visits: user.visits.length
-    };
+    try {
+      const users = await this.getUsers();
+      const user = users[userId];
+      if (!user) {
+        return { followers: 0, following: 0, visits: 0 };
+      }
+      return {
+        followers: user.followers.length,
+        following: user.following.length,
+        visits: user.visits.length
+      };
+    } catch (error) {
+      console.error('Error getting user stats:', error);
+      return { followers: 0, following: 0, visits: 0 };
+    }
   }
 
   async recordVisit(visitorId: string, visitedId: string): Promise<void> {
-    const users = await this.getUsers();
-    
-    // Añadir visita solo si no es el mismo usuario
-    if (visitorId !== visitedId) {
-      const visits = users[visitedId].visits;
+    try {
+      const users = await this.getUsers();
+      const visitor = users[visitorId];
+      const visited = users[visitedId];
+      
+      // Verificar que ambos usuarios existen y no son el mismo
+      if (!visitor || !visited || visitorId === visitedId) return;
+
+      const visits = visited.visits;
       // Mantener solo las últimas 100 visitas y añadir la nueva al principio
       visits.unshift(visitorId);
-      users[visitedId].visits = visits.slice(0, 100);
+      visited.visits = visits.slice(0, 100);
       await this.saveUsers(users);
+    } catch (error) {
+      console.error('Error recording visit:', error);
     }
   }
 
   async getVisits(userId: string): Promise<User[]> {
-    const users = await this.getUsers();
-    const user = users[userId];
-    // Obtener usuarios únicos de las visitas
-    const uniqueVisits = [...new Set(user.visits)];
-    return uniqueVisits.map(id => users[id]);
+    try {
+      const users = await this.getUsers();
+      const user = users[userId];
+      if (!user) return [];
+      // Obtener usuarios únicos de las visitas y filtrar usuarios que no existen
+      const uniqueVisits = [...new Set(user.visits)];
+      return uniqueVisits.map(id => users[id]).filter(Boolean);
+    } catch (error) {
+      console.error('Error getting visits:', error);
+      return [];
+    }
   }
 }
 

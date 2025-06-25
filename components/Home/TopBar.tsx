@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Href, router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { IconButton } from 'react-native-paper';
 import Tag from '../General/Tag';
@@ -31,8 +31,14 @@ export default function TopBar({
   onSearchPress = () => navigateTo('/search'),
   onNotificationsPress = () => navigateTo('/notifications'),
   isUpdating = false,
+  onExpandChange = (_: boolean) => {},
 }) {
   const [expanded, setExpanded] = useState(false);
+
+  // Notificar cambios en el estado expanded
+  useEffect(() => {
+    onExpandChange(expanded);
+  }, [expanded, onExpandChange]);
   const title = 'Nows';
   const topInset = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0;
 

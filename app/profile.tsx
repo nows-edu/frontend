@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import { IconButton } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,19 +8,35 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // Importar componentes del perfil existente
 import ProfileBanner from '@/components/Profile/Banner';
 import Career from '@/components/Profile/Career';
-import { EmptyAgenda, EmptyNows } from '@/components/Profile/EmptyStates';
+import { EmptyNows } from '@/components/Profile/EmptyStates';
 import FollowButton from '@/components/Profile/FollowButton';
 import ProfileInfo from '@/components/Profile/Info';
 import Interests from '@/components/Profile/Interests';
 import ProfileStats from '@/components/Profile/Stats';
 import TabSlider, { TabOption } from '@/components/Profile/TabSlider';
 import UserDisplay from '@/components/Profile/UserDisplay';
+import { CareerItem } from '@/types/career';
 import { followService } from '@/utils/followService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Mock profiles data (expanded for all users)
-const MOCK_PROFILES = {
+interface UserProfile {
+  name: string;
+  username: string;
+  status: string;
+  statusColor: string;
+  avatarUrl: string;
+  following: number;
+  followers: number;
+  visits: number;
+  education: string;
+  location: string;
+  interests: string[];
+  career: CareerItem[];
+}
+
+const MOCK_PROFILES: Record<string, UserProfile> = {
   '1': {
     name: 'Aina F.C.',
     username: 'aina.fc',
@@ -35,24 +51,28 @@ const MOCK_PROFILES = {
     interests: ['Tecnología', 'Apps', 'Música'],
     career: [
       { 
-        year: '2023', 
-        achievement: 'Presidenta ELSA SPAIN',
-        description: 'Liderazgo de la asociación europea de estudiantes de derecho en España. Gestión de equipos, organización de eventos y representación internacional.'
+        year: '2025',
+        university: 'Universidad Politécnica de Catalunya',
+        universityAcronym: 'UPC',
+        degree: 'Grado en Ingeniería Informática',
+        achievement: 'Especialización en Software y Mobile',
+        description: 'Cursando último año del grado. Especialización en Ingeniería del Software y desarrollo de aplicaciones móviles. Participación activa en proyectos de innovación universitaria.'
       },
       { 
-        year: '2022', 
-        achievement: 'Miembro activo del Club de Debate',
-        description: 'Participación en torneos nacionales e internacionales de debate universitario. Desarrollo de habilidades de argumentación y oratoria.'
+        year: '2024',
+        university: 'Technische Universität München',
+        universityAcronym: 'TUM',
+        degree: 'Erasmus en Computer Science',
+        achievement: 'Foco en AI y Cloud Computing',
+        description: 'Programa de intercambio Erasmus+. Foco en Inteligencia Artificial y Computación en la Nube. Participación en el hackathon TUM.ai y desarrollo de proyectos de machine learning.'
       },
       { 
-        year: '2021', 
-        achievement: 'Delegada de curso',
-        description: 'Representante estudiantil del grado en ADE + Derecho. Coordinación con profesorado y mediación en asuntos académicos.'
-      },
-      { 
-        year: '2019', 
-        achievement: 'Inicio ADE + Derecho (UAB)',
-        description: 'Comienzo del doble grado en Administración y Dirección de Empresas y Derecho en la Universidad Autónoma de Barcelona.'
+        year: '2023',
+        university: 'Universidad Politécnica de Catalunya',
+        universityAcronym: 'UPC',
+        degree: 'Ingreso en Ingeniería Informática',
+        achievement: 'Primer año con excelencia',
+        description: 'Inicio del grado con excelencia académica. Participación en el programa de mentoring para nuevos estudiantes. Desarrollo de una aplicación de gestión académica que se implementó en la facultad.'
       }
     ]
   },
@@ -69,12 +89,33 @@ const MOCK_PROFILES = {
     location: 'Barcelona, España',
     interests: ['Música', 'DJ', 'Instrumentos'],
     career: [
-      { year: '2023', achievement: 'Productor en Universal Music', description: 'Producción musical profesional en una de las discográficas más importantes del mundo.' },
-      { year: '2021', achievement: 'DJ Residente en Club XYZ', description: 'DJ oficial en uno de los clubs más reconocidos de Barcelona.' },
-      { year: '2020', achievement: 'Productor Independiente', description: 'Inicio como productor musical independiente, trabajando con artistas locales.' }
+      { 
+        year: '2025',
+        university: 'Escola Superior de Música de Catalunya',
+        universityAcronym: 'ESMUC',
+        degree: 'Grado en Producción y Composición Musical',
+        achievement: 'Especialización en Música Electrónica',
+        description: 'Desarrollo de proyectos de producción musical y composición para medios audiovisuales. Participación en festivales de música electrónica.'
+      },
+      { 
+        year: '2024',
+        university: 'Berklee College of Music',
+        universityAcronym: 'BERKLEE',
+        degree: 'Music Production & Engineering',
+        achievement: 'Producción de EP debut',
+        description: 'Programa de intercambio con foco en producción musical y tecnología de audio. Producción y lanzamiento de EP personal en plataformas digitales.'
+      },
+      { 
+        year: '2023',
+        university: 'Escola Superior de Música de Catalunya',
+        universityAcronym: 'ESMUC',
+        degree: 'Producción Musical',
+        achievement: 'Premio al Mejor Proyecto Novel',
+        description: 'Inicio de estudios en producción musical. Premio al mejor proyecto novel por composición original para cortometraje.'
+      }
     ]
   },
-  'u1': {
+  '3': {
     name: 'Elena García',
     username: 'elena_g',
     status: 'Estudiante Arquitectura',
@@ -87,11 +128,25 @@ const MOCK_PROFILES = {
     location: 'Barcelona, España',
     interests: ['Diseño', 'Arte', 'Viajes'],
     career: [
-      { year: '2023', achievement: 'Prácticas en Foster + Partners', description: 'Prácticas profesionales en uno de los estudios de arquitectura más prestigiosos del mundo.' },
-      { year: '2022', achievement: 'Proyecto destacado en concurso estudiantil', description: 'Reconocimiento por proyecto innovador de vivienda sostenible.' }
+      { 
+        year: '2024',
+        university: 'Universidad Politécnica de Catalunya',
+        universityAcronym: 'UPC',
+        degree: 'Máster en Arquitectura',
+        achievement: 'Prácticas en Foster + Partners',
+        description: 'Prácticas profesionales en uno de los estudios de arquitectura más prestigiosos del mundo.'
+      },
+      { 
+        year: '2023',
+        university: 'Universidad Politécnica de Catalunya',
+        universityAcronym: 'UPC',
+        degree: 'Grado en Arquitectura',
+        achievement: 'Proyecto destacado en concurso estudiantil',
+        description: 'Reconocimiento por proyecto innovador de vivienda sostenible.'
+      }
     ]
   },
-  'u2': {
+  '4': {
     name: 'Carlos López',
     username: 'carlos_l',
     status: 'Future Engineer',
@@ -104,11 +159,25 @@ const MOCK_PROFILES = {
     location: 'Barcelona, España',
     interests: ['Tecnología', 'Innovación', 'Startups'],
     career: [
-      { year: '2023', achievement: 'Intern at Tesla', description: 'Prácticas en Tesla Motors en el departamento de manufactura.' },
-      { year: '2022', achievement: 'Winner Hackathon Barcelona', description: 'Primer lugar en hackathon de tecnología sostenible.' }
+      { 
+        year: '2024',
+        university: 'Universidad Politécnica de Catalunya',
+        universityAcronym: 'UPC',
+        degree: 'Máster en Ingeniería Industrial',
+        achievement: 'Intern at Tesla',
+        description: 'Prácticas en Tesla Motors en el departamento de manufactura.'
+      },
+      { 
+        year: '2023',
+        university: 'Universidad Politécnica de Catalunya',
+        universityAcronym: 'UPC',
+        degree: 'Ingeniería Industrial',
+        achievement: 'Winner Hackathon Barcelona',
+        description: 'Primer lugar en hackathon de tecnología sostenible.'
+      }
     ]
   },
-  'u3': {
+  '5': {
     name: 'Ana Martínez',
     username: 'ana_m',
     status: 'Med Student',
@@ -121,11 +190,25 @@ const MOCK_PROFILES = {
     location: 'Cerdanyola del Vallès',
     interests: ['Medicina', 'Investigación', 'Voluntariado'],
     career: [
-      { year: '2023', achievement: 'Voluntaria en Médicos sin Fronteras', description: 'Participación en misiones humanitarias locales.' },
-      { year: '2022', achievement: 'Beca de investigación', description: 'Beca para proyecto de investigación en cardiología.' }
+      { 
+        year: '2024',
+        university: 'Universidad de Barcelona',
+        universityAcronym: 'UB',
+        degree: 'Doctorado en Medicina',
+        achievement: 'Voluntaria en Médicos sin Fronteras',
+        description: 'Participación en misiones humanitarias locales.'
+      },
+      { 
+        year: '2023',
+        university: 'Universidad de Barcelona',
+        universityAcronym: 'UB',
+        degree: 'Medicina',
+        achievement: 'Beca de investigación',
+        description: 'Beca para proyecto de investigación en cardiología.'
+      }
     ]
   },
-  'u4': {
+  '6': {
     name: 'Miguel Torres',
     username: 'miguel_t',
     status: 'Creative Mind',
@@ -138,11 +221,25 @@ const MOCK_PROFILES = {
     location: 'Barcelona, España',
     interests: ['Diseño', 'Arte Digital', 'UX/UI'],
     career: [
-      { year: '2023', achievement: 'Freelance Designer', description: 'Diseñador freelance para startups tecnológicas.' },
-      { year: '2022', achievement: 'Premio mejor proyecto final', description: 'Reconocimiento al mejor proyecto de fin de carrera.' }
+      { 
+        year: '2024',
+        university: 'Universidad Politécnica de Catalunya',
+        universityAcronym: 'UPC',
+        degree: 'Máster en Diseño Digital',
+        achievement: 'Freelance Designer',
+        description: 'Diseñador freelance para startups tecnológicas.'
+      },
+      { 
+        year: '2023',
+        university: 'ELISAVA',
+        universityAcronym: 'ELISAVA',
+        degree: 'Grado en Diseño',
+        achievement: 'Premio mejor proyecto final',
+        description: 'Reconocimiento al mejor proyecto de fin de carrera.'
+      }
     ]
   },
-  'u5': {
+  '7': {
     name: 'Laura Sánchez',
     username: 'laura_s',
     status: 'Global Citizen',
@@ -155,11 +252,25 @@ const MOCK_PROFILES = {
     location: 'Barcelona, España',
     interests: ['Política', 'Idiomas', 'Culturas'],
     career: [
-      { year: '2023', achievement: 'Erasmus en París', description: 'Intercambio académico en Sciences Po París.' },
-      { year: '2022', achievement: 'Modelo de Naciones Unidas', description: 'Participación en MUN Barcelona como delegada.' }
+      { 
+        year: '2024',
+        university: 'Sciences Po Paris',
+        universityAcronym: 'SciencesPo',
+        degree: 'Relaciones Internacionales',
+        achievement: 'Erasmus en París',
+        description: 'Intercambio académico en Sciences Po París.'
+      },
+      { 
+        year: '2023',
+        university: 'Universidad Pompeu Fabra',
+        universityAcronym: 'UPF',
+        degree: 'Ciencias Políticas',
+        achievement: 'Modelo de Naciones Unidas',
+        description: 'Participación en MUN Barcelona como delegada.'
+      }
     ]
   },
-  'u6': {
+  '8': {
     name: 'Diego Ruiz',
     username: 'diego_r',
     status: 'Athlete Mode',
@@ -172,11 +283,25 @@ const MOCK_PROFILES = {
     location: 'Barcelona, España',
     interests: ['Fútbol', 'Fitness', 'Nutrición'],
     career: [
-      { year: '2023', achievement: 'Entrenador personal certificado', description: 'Certificación como entrenador personal especializado en deportes de equipo.' },
-      { year: '2022', achievement: 'Capitán equipo universitario', description: 'Capitán del equipo de fútbol de la universidad.' }
+      { 
+        year: '2024',
+        university: 'INEFC Barcelona',
+        universityAcronym: 'INEFC',
+        degree: 'Ciencias de la Actividad Física',
+        achievement: 'Entrenador personal certificado',
+        description: 'Certificación como entrenador personal especializado en deportes de equipo.'
+      },
+      { 
+        year: '2023',
+        university: 'INEFC Barcelona',
+        universityAcronym: 'INEFC',
+        degree: 'CAFE',
+        achievement: 'Capitán equipo universitario',
+        description: 'Capitán del equipo de fútbol de la universidad.'
+      }
     ]
   },
-  'u7': {
+  '9': {
     name: 'Sofia Pérez',
     username: 'sofia_p',
     status: 'Bookworm',
@@ -189,11 +314,25 @@ const MOCK_PROFILES = {
     location: 'Barcelona, España',
     interests: ['Literatura', 'Escritura', 'Teatro'],
     career: [
-      { year: '2023', achievement: 'Editora revista universitaria', description: 'Editora jefe de la revista literaria de la universidad.' },
-      { year: '2022', achievement: 'Premio de poesía joven', description: 'Ganadora del concurso de poesía joven de Catalunya.' }
+      { 
+        year: '2024',
+        university: 'Universidad de Barcelona',
+        universityAcronym: 'UB',
+        degree: 'Filología Catalana',
+        achievement: 'Editora revista universitaria',
+        description: 'Editora jefe de la revista literaria de la universidad.'
+      },
+      { 
+        year: '2023',
+        university: 'Universidad de Barcelona',
+        universityAcronym: 'UB',
+        degree: 'Filología Catalana',
+        achievement: 'Premio de poesía joven',
+        description: 'Ganadora del concurso de poesía joven de Catalunya.'
+      }
     ]
   },
-  'u8': {
+  '10': {
     name: 'Javier Morales',
     username: 'javier_m',
     status: 'Entrepreneur',
@@ -206,11 +345,25 @@ const MOCK_PROFILES = {
     location: 'Barcelona, España',
     interests: ['Negocios', 'Innovación', 'Inversión'],
     career: [
-      { year: '2023', achievement: 'Co-fundador startup EdTech', description: 'Co-fundación de startup enfocada en educación digital.' },
-      { year: '2022', achievement: 'Incubadora ESADE BAN', description: 'Seleccionado para programa de incubación de empresas.' }
+      { 
+        year: '2024',
+        university: 'ESADE Business School',
+        universityAcronym: 'ESADE',
+        degree: 'MBA',
+        achievement: 'Co-fundador startup EdTech',
+        description: 'Co-fundación de startup enfocada en educación digital.'
+      },
+      { 
+        year: '2023',
+        university: 'ESADE Business School',
+        universityAcronym: 'ESADE',
+        degree: 'Administración de Empresas',
+        achievement: 'Incubadora ESADE BAN',
+        description: 'Seleccionado para programa de incubación de empresas.'
+      }
     ]
   },
-  'u9': {
+  '11': {
     name: 'Carmen Flores',
     username: 'carmen_f',
     status: 'Eco Warrior',
@@ -223,11 +376,25 @@ const MOCK_PROFILES = {
     location: 'Cerdanyola del Vallès',
     interests: ['Sostenibilidad', 'Naturaleza', 'Activismo'],
     career: [
-      { year: '2023', achievement: 'Investigación en cambio climático', description: 'Participación en proyecto de investigación sobre impacto del cambio climático.' },
-      { year: '2022', achievement: 'Activista Fridays for Future', description: 'Coordinadora local del movimiento climático juvenil.' }
+      { 
+        year: '2024',
+        university: 'Universidad Autónoma de Barcelona',
+        universityAcronym: 'UAB',
+        degree: 'Ciencias Ambientales',
+        achievement: 'Investigación en cambio climático',
+        description: 'Participación en proyecto de investigación sobre impacto del cambio climático.'
+      },
+      { 
+        year: '2023',
+        university: 'Universidad Autónoma de Barcelona',
+        universityAcronym: 'UAB',
+        degree: 'Ciencias Ambientales',
+        achievement: 'Activista Fridays for Future',
+        description: 'Coordinadora local del movimiento climático juvenil.'
+      }
     ]
   },
-  'u10': {
+  '12': {
     name: 'Roberto Silva',
     username: 'roberto_s',
     status: 'Code Ninja',
@@ -240,178 +407,147 @@ const MOCK_PROFILES = {
     location: 'Barcelona, España',
     interests: ['Programación', 'AI/ML', 'Open Source'],
     career: [
-      { year: '2023', achievement: 'Desarrollador en Google Summer of Code', description: 'Participación en programa de desarrollo de código abierto de Google.' },
-      { year: '2022', achievement: 'Hackathon winner', description: 'Ganador del hackathon de inteligencia artificial de la UPC.' }
+      { 
+        year: '2024',
+        university: 'Universidad Politécnica de Catalunya',
+        universityAcronym: 'UPC',
+        degree: 'Ingeniería Informática',
+        achievement: 'Desarrollador en Google Summer of Code',
+        description: 'Participación en programa de desarrollo de código abierto de Google.'
+      },
+      { 
+        year: '2023',
+        university: 'Universidad Politécnica de Catalunya',
+        universityAcronym: 'UPC',
+        degree: 'Ingeniería Informática',
+        achievement: 'Hackathon winner',
+        description: 'Ganador del hackathon de inteligencia artificial de la UPC.'
+      }
     ]
-  },
+  }
 };
 
-const ProfileScreen = () => {
+export default function OtherUserProfileScreen() {
   const params = useLocalSearchParams();
-  const userId = typeof params.userId === 'string' ? params.userId : Array.isArray(params.userId) ? params.userId[0] : undefined;
+  const userId = params.id as string;
   const insets = useSafeAreaInsets();
-  
   const [selectedTab, setSelectedTab] = useState<TabOption>('nows');
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [followerCount, setFollowerCount] = useState(0);
-  const [followingCount, setFollowingCount] = useState(0);
-  const [visitCount, setVisitCount] = useState(0);
+  const [userProfile, setUserProfile] = useState<typeof MOCK_PROFILES['1']>(MOCK_PROFILES['1']);
+  const [followStats, setFollowStats] = useState({
+    following: 0,
+    followers: 0,
+    visits: 0
+  });
 
-  const currentUserId = 'carol'; // Current user ID
-  const userProfile = userId ? MOCK_PROFILES[userId as keyof typeof MOCK_PROFILES] : null;
-
-  // Load follow stats
-  const loadFollowStats = useCallback(async () => {
-    if (userId && userProfile) {
-      try {
-        // Check if current user is following the profile user
-        const following = await followService.isFollowing(currentUserId, userId);
-        setIsFollowing(following);
-
-        // Get stats
-        const stats = await followService.getUserStats(userId);
-        setFollowerCount(userProfile.followers || stats.followers);
-        setFollowingCount(userProfile.following || stats.following);
-        setVisitCount(userProfile.visits || stats.visits);
-
-        // Record visit
-        await followService.recordVisit(currentUserId, userId);
-      } catch (error) {
-        console.error('Error loading follow stats:', error);
-        // Fallback to mock data
-        setFollowerCount(userProfile.followers || 0);
-        setFollowingCount(userProfile.following || 0);
-        setVisitCount(userProfile.visits || 0);
-      }
-    }
-  }, [userId, userProfile]);
-
+  // Cargar datos del usuario
   useEffect(() => {
-    loadFollowStats();
-  }, [loadFollowStats]);
+    // Aquí iría la llamada a la API para cargar el perfil real
+    // Por ahora usamos el mock
+    setUserProfile(MOCK_PROFILES['1']);
+  }, [userId]);
 
-  const handleToggleFollow = async () => {
-    if (!userId) return;
-    
-    try {
-      if (isFollowing) {
-        await followService.unfollowUser(currentUserId, userId);
-        setFollowerCount(prev => prev - 1);
-      } else {
-        await followService.followUser(currentUserId, userId);
-        setFollowerCount(prev => prev + 1);
+  // Cargar estadísticas
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const stats = await followService.getUserStats(userId);
+        setFollowStats(stats);
+      } catch (error) {
+        console.error('Error loading user stats:', error);
       }
-      setIsFollowing(!isFollowing);
-    } catch (error) {
-      console.error('Error toggling follow:', error);
-    }
-  };
+    };
+    loadStats();
+  }, [userId]);
 
-  if (!userProfile) {
-    return (
-      <View style={styles.container}>
-        <StatusBar style="light" />
-        <View style={styles.backButtonContainer}>
-          <IconButton
-            icon="arrow-left"
-            iconColor="white"
-            size={24}
-            onPress={() => router.back()}
-            style={styles.backButtonStyle}
-          />
-        </View>
-      </View>
-    );
-  }
+  const profileInfo = [
+    {
+      type: 'education',
+      text: userProfile.education,
+    },
+    {
+      type: 'location',
+      text: userProfile.location,
+    },
+  ];
 
   return (
-    <View style={styles.container}>
-      <StatusBar style="light" />
-      
-      {/* Botón de volver integrado en el contenido */}
-      <View style={styles.backButtonContainer}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={styles.header}>
         <IconButton
           icon="arrow-left"
-          iconColor="white"
           size={24}
+          iconColor="white"
           onPress={() => router.back()}
-          style={styles.backButtonStyle}
         />
       </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingTop: insets.top + 20 } // Padding más pequeño
-        ]}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <ProfileBanner
-          key={`external-banner-${userId}`}
+        <ProfileBanner 
           imageUri={userProfile.avatarUrl}
+          statusColor={userProfile.statusColor}
           statusText={userProfile.status}
-          statusColor={userProfile.statusColor}
           isEditable={false}
         />
+        
+        <View style={styles.contentWrapper}>
+          <View style={styles.userDisplayContainer}>
+            <UserDisplay
+              name={userProfile.name}
+              username={userProfile.username}
+              isEditable={false}
+            />
+            <FollowButton userId={userId} />
+          </View>
 
-        <UserDisplay
-          key={`external-display-${userId}`}
-          name={userProfile.name}
-          username={userProfile.username}
-        />
+          <ProfileStats
+            following={followStats.following}
+            followers={followStats.followers}
+            visits={followStats.visits}
+            userId={userId}
+          />
 
-        <ProfileStats
-          key={`external-stats-${userId}`}
-          following={followingCount}
-          followers={followerCount}
-          visits={visitCount}
-        />
+          <ProfileInfo
+            items={profileInfo}
+            isEditable={false}
+          />
 
-        <FollowButton
-          key={`external-follow-${userId}`}
-          isFollowing={isFollowing}
-          onToggleFollow={handleToggleFollow}
-        />
+          <Interests
+            items={userProfile.interests}
+            statusColor={userProfile.statusColor}
+            isEditable={false}
+          />
 
-        <ProfileInfo
-          key={`external-info-${userId}`}
-          items={[
-            { type: 'education', text: userProfile.education },
-            { type: 'location', text: userProfile.location }
-          ]}
-          isEditable={false}
-        />
+          <TabSlider
+            onTabChange={setSelectedTab}
+            initialTab={selectedTab}
+            tabs={['nows', 'career']}
+          />
 
-        <Interests
-          key={`external-interests-${userId}`}
-          items={userProfile.interests}
-          statusColor={userProfile.statusColor}
-          isEditable={false}
-        />
+          {selectedTab === 'nows' && (
+            <View style={styles.sectionContainer}>
+              <EmptyNows />
+            </View>
+          )}
 
-        <Career
-          key={`external-career-${userId}`}
-          items={userProfile.career.map(item => ({
-            year: item.year,
-            achievement: item.achievement,
-            description: item.description || ''
-          }))}
-          color={userProfile.statusColor}
-          isEditable={false}
-        />
-
-        <TabSlider
-          onTabChange={setSelectedTab}
-          initialTab={selectedTab}
-        />
-
-        {selectedTab === 'nows' && <EmptyNows />}
-        {selectedTab === 'agenda' && <EmptyAgenda />}
+          {selectedTab === 'career' && (
+            <View style={styles.sectionContainer}>
+              <Career
+                items={userProfile.career}
+                color={userProfile.statusColor}
+                isEditable={false}
+              />
+            </View>
+          )}
+        </View>
       </ScrollView>
+      <StatusBar style="light" />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -419,37 +555,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
   },
   header: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 1000,
-    backgroundColor: 'transparent',
-  },
-  backButtonContainer: {
-    position: 'absolute',
-    top: 50, // Posición fija desde arriba
-    left: 16,
-    zIndex: 1000,
-  },
-  backButtonStyle: {
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    borderRadius: 20,
-    margin: 0,
-  },
-  backButton: {
-    position: 'absolute',
-    left: SCREEN_WIDTH * 0.02,
-    top: SCREEN_WIDTH * 0.02,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SCREEN_WIDTH * 0.02,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 100,
+    flexGrow: 1,
+  },
+  contentWrapper: {
+    flex: 1,
+  },
+  userDisplayContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    paddingRight: SCREEN_WIDTH * 0.05,
+  },
+  sectionContainer: {
+    flex: 1,
+    marginTop: SCREEN_WIDTH * 0.04,
   },
 });
-
-export default ProfileScreen;

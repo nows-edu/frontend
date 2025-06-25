@@ -25,8 +25,9 @@ const CURRENT_USER_PROFILE = {
   statusColor: 'rgb(250, 38, 38)',
   avatarUrl: 'https://i.pravatar.cc/150?img=1',
   interests: ['Tecnología', 'Apps', 'Música'],
-  education: 'Ingeniería Informática - UPC',
-  degree: 'Grado en Ingeniería Informática',
+  university: 'Universidad Politécnica de Catalunya',
+  universityAcronym: 'UPC',
+  degree: 'Ingeniería Informática',
   location: 'Barcelona, España',
 };
 
@@ -36,11 +37,12 @@ export default function ProfileScreen() {
   const [statusColor, setStatusColor] = useState(CURRENT_USER_PROFILE.statusColor);
   const [profileImage, setProfileImage] = useState(CURRENT_USER_PROFILE.avatarUrl);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
-  const [education, setEducation] = useState(CURRENT_USER_PROFILE.education);
+  const [university, setUniversity] = useState(CURRENT_USER_PROFILE.university);
+  const [universityAcronym, setUniversityAcronym] = useState(CURRENT_USER_PROFILE.universityAcronym);
   const [degree, setDegree] = useState(CURRENT_USER_PROFILE.degree);
   const [location, setLocation] = useState(CURRENT_USER_PROFILE.location);
   const [selectedTab, setSelectedTab] = useState<TabOption>('nows');
-  const [careerItems, setCareerItems] = useState<Array<{ year: string; achievement: string; description?: string; }>>([]);
+  const [careerItems, setCareerItems] = useState<CareerItem[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
@@ -98,7 +100,8 @@ export default function ProfileScreen() {
         savedStatus,
         savedColor,
         savedImage,
-        savedEducation,
+        savedUniversity,
+        savedUniversityAcronym,
         savedDegree,
         savedLocation,
         savedCareerItems,
@@ -107,7 +110,8 @@ export default function ProfileScreen() {
         AsyncStorage.getItem('userStatus'),
         AsyncStorage.getItem('userStatusColor'),
         AsyncStorage.getItem('userProfileImage'),
-        AsyncStorage.getItem('userEducation'),
+        AsyncStorage.getItem('userUniversity'),
+        AsyncStorage.getItem('userUniversityAcronym'),
         AsyncStorage.getItem('userDegree'),
         AsyncStorage.getItem('userLocation'),
         AsyncStorage.getItem('userCareerItems'),
@@ -127,8 +131,11 @@ export default function ProfileScreen() {
       if (savedImage) setProfileImage(savedImage);
       else setProfileImage(CURRENT_USER_PROFILE.avatarUrl);
       
-      if (savedEducation) setEducation(savedEducation);
-      else setEducation(CURRENT_USER_PROFILE.education);
+      if (savedUniversity) setUniversity(savedUniversity);
+      else setUniversity(CURRENT_USER_PROFILE.university);
+      
+      if (savedUniversityAcronym) setUniversityAcronym(savedUniversityAcronym);
+      else setUniversityAcronym(CURRENT_USER_PROFILE.universityAcronym);
       
       if (savedDegree) setDegree(savedDegree);
       else setDegree(CURRENT_USER_PROFILE.degree);
@@ -192,39 +199,94 @@ export default function ProfileScreen() {
     }
   };
 
+  const profileInfo = [
+    {
+      type: 'education',
+      text: `${universityAcronym} - ${degree}`,
+    },
+    {
+      type: 'location',
+      text: location,
+    },
+  ];
+
+  // Cargar datos iniciales de ejemplo para la trayectoria
+  const loadInitialCareerItems = async () => {
+    const initialItems: CareerItem[] = [
+      {
+        year: '2025',
+        university: 'Universidad Politécnica de Catalunya',
+        universityAcronym: 'UPC',
+        degree: 'Grado en Ingeniería Informática',
+        achievement: 'Especialización en Software y Mobile',
+        description: 'Cursando último año del grado. Especialización en Ingeniería del Software y desarrollo de aplicaciones móviles. Participación activa en proyectos de innovación universitaria.'
+      },
+      {
+        year: '2024',
+        university: 'Technische Universität München',
+        universityAcronym: 'TUM',
+        degree: 'Erasmus en Computer Science',
+        achievement: 'Foco en AI y Cloud Computing',
+        description: 'Programa de intercambio Erasmus+. Foco en Inteligencia Artificial y Computación en la Nube. Participación en el hackathon TUM.ai y desarrollo de proyectos de machine learning.'
+      },
+      {
+        year: '2023',
+        university: 'Universidad Politécnica de Catalunya',
+        universityAcronym: 'UPC',
+        degree: 'Ingreso en Ingeniería Informática',
+        achievement: 'Primer año con excelencia',
+        description: 'Inicio del grado con excelencia académica. Participación en el programa de mentoring para nuevos estudiantes. Desarrollo de una aplicación de gestión académica que se implementó en la facultad.'
+      }
+    ];
+
+    try {
+      const existingItems = await AsyncStorage.getItem('userCareerItems');
+      if (!existingItems) {
+        setCareerItems(initialItems);
+        await AsyncStorage.setItem('userCareerItems', JSON.stringify(initialItems));
+      }
+    } catch (error) {
+      console.error('Error loading initial career items:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadInitialCareerItems();
+  }, []);
+
   return (
-    <>
-      <View style={styles.container}>
-        <Header title="Perfil" points={350} />
-        <ScrollView style={styles.content}>
-          <ProfileBanner
-            key={`banner-${refreshKey}`}
-            statusText={status}
-            statusColor={statusColor}
-            onStatusChange={handleStatusChange}
-            imageUri={profileImage}
-            onImageChange={handleImageChange}
-            isEditable={true}
-          />
+    <View style={styles.container}>
+      <Header points={180} />
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <ProfileBanner 
+          imageUri={profileImage}
+          statusColor={statusColor}
+          statusText={status}
+          isEditable={true}
+          onStatusChange={(newStatus, newColor) => {
+            setStatus(newStatus);
+            setStatusColor(newColor);
+          }}
+          onImageChange={setProfileImage}
+        />
+        <View style={styles.contentWrapper}>
           <UserDisplay
-            key={`user-display-${refreshKey}`}
             name={CURRENT_USER_PROFILE.name}
             username={CURRENT_USER_PROFILE.username}
+            isEditable={true}
           />
           <ProfileStats
-            key={`stats-${refreshKey}`}
             following={followingCount}
             followers={followerCount}
             visits={visitCount}
-            userId={currentUserId}
+            userId={CURRENT_USER_PROFILE.username}
           />
           <ProfileInfo
-            key={`info-${refreshKey}`}
-            items={[
-              { type: 'education', text: education || CURRENT_USER_PROFILE.education },
-              { type: 'degree', text: degree || CURRENT_USER_PROFILE.degree },
-              { type: 'location', text: location || CURRENT_USER_PROFILE.location }
-            ]}
+            items={profileInfo}
             isEditable={true}
           />
           <Interests
@@ -233,32 +295,59 @@ export default function ProfileScreen() {
             statusColor={statusColor}
             isEditable={true}
           />
-          <TabSlider onTabChange={setSelectedTab} initialTab={selectedTab} />
-          {selectedTab === 'nows' && <EmptyNows isOwnProfile={true} />}
-          {selectedTab === 'agenda' && <EmptyAgenda />}
-          {selectedTab === 'career' && (
-            <Career
-              items={careerItems}
-              color={statusColor}
-              onAddItem={() => setIsModalVisible(true)}
-              onEditItem={handleEditCareerItem}
-              onDeleteItem={handleDeleteCareerItem}
-            />
+          <TabSlider
+            onTabChange={setSelectedTab}
+            initialTab={selectedTab}
+            tabs={['nows', 'career', 'agenda']}
+          />
+
+          {selectedTab === 'nows' && (
+            <View style={styles.sectionContainer}>
+              <EmptyNows />
+            </View>
           )}
-        </ScrollView>
-      </View>
-      <CareerModal
-        visible={isModalVisible}
-        onClose={() => {
-          setIsModalVisible(false);
-          setEditingItem(null);
-        }}
-        onSave={handleSaveCareerItem}
-        color={statusColor}
-        initialValues={editingItem?.item}
-        isEditing={!!editingItem}
-      />
-    </>
+
+          {selectedTab === 'agenda' && (
+            <View style={styles.sectionContainer}>
+              <EmptyAgenda />
+            </View>
+          )}
+
+          {selectedTab === 'career' && (
+            <View style={styles.sectionContainer}>
+              <Career
+                items={careerItems}
+                color={statusColor}
+                isEditable={true}
+                onAddItem={() => {
+                  setEditingItem(null);
+                  setIsModalVisible(true);
+                }}
+                onEditItem={handleEditCareerItem}
+                onDeleteItem={handleDeleteCareerItem}
+              />
+            </View>
+          )}
+
+          <CareerModal
+            visible={isModalVisible}
+            onClose={() => {
+              setIsModalVisible(false);
+              setEditingItem(null);
+            }}
+            onSave={handleSaveCareerItem}
+            onDelete={editingItem ? () => {
+              handleDeleteCareerItem(editingItem.index);
+              setIsModalVisible(false);
+              setEditingItem(null);
+            } : undefined}
+            color={statusColor}
+            initialValues={editingItem?.item}
+            isEditing={!!editingItem}
+          />
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -268,7 +357,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
     paddingTop: Platform.OS === 'android' ? 80 : 60, // Más padding para bajar todo el contenido aún más
   },
-  content: {
+  scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
+  contentWrapper: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  sectionContainer: {
+    paddingVertical: 16,
+    paddingHorizontal: 8,
   },
 });

@@ -6,6 +6,9 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 type CareerItem = {
   year: string;
+  university: string;
+  universityAcronym: string;
+  degree: string;
   achievement: string;
   description?: string;
 };
@@ -110,7 +113,7 @@ export default function Career(props: CareerProps) {
                 >
                   <View style={[styles.headerRow, styles.addButtonRow]}>
                     <Text style={[styles.achievementText, { color: color }]}>
-                      Añadir nueva experiencia académica
+                      Añadir experiencia académica
                     </Text>
                   </View>
                 </Pressable>
@@ -126,7 +129,9 @@ export default function Career(props: CareerProps) {
                     <View style={[styles.yearBadge, { backgroundColor: color + '33', borderColor: color }]}>
                       <Text style={styles.yearText}>{item.year}</Text>
                     </View>
-                    <Text style={styles.achievementText}>{item.achievement}</Text>
+                    <Text style={styles.achievementText}>
+                      {item.achievement}
+                    </Text>
                     {isEditable && (
                       <Pressable
                         onPress={() => onEditItem?.(index, item)}
@@ -159,7 +164,7 @@ export default function Career(props: CareerProps) {
                     ]}
                   >
                     <Text style={styles.descriptionText}>
-                      {item.description || 'Logro académico destacado que marca un hito en mi trayectoria universitaria.'}
+                      {item.description}
                     </Text>
                   </Animated.View>
                 </Pressable>
@@ -175,6 +180,7 @@ export default function Career(props: CareerProps) {
 const styles = StyleSheet.create({
   container: {
     paddingVertical: SCREEN_WIDTH * 0.04,
+    marginHorizontal: -SCREEN_WIDTH * 0.04, // Elimina el margen lateral
   },
   actionButtons: {
     flexDirection: 'row',
@@ -222,7 +228,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: SCREEN_WIDTH * 0.03,
     gap: SCREEN_WIDTH * 0.03,
-    minHeight: SCREEN_WIDTH * 0.08,
+    minHeight: SCREEN_WIDTH * 0.12,
   },
   yearBadge: {
     paddingHorizontal: SCREEN_WIDTH * 0.025,
