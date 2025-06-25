@@ -246,7 +246,7 @@ export const uploadNowFile = async (file: File, type: string, id_creator: number
 };
 
 // Create NOW from URL
-export const createNowFromUrl = async (url_content: string, type: string, id_creator: number): Promise<{ success: boolean, now?: any, error?: string }> => {
+export const createNowFromUrl = async (url_content: string, type: string, id_creator: number, description?: string): Promise<{ success: boolean, now?: any, error?: string }> => {
   if (USE_BACKEND) {
     try {
       const response = await fetch(`${API_URL}/api/upload/now/url`, {
@@ -254,7 +254,7 @@ export const createNowFromUrl = async (url_content: string, type: string, id_cre
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url: url_content, type, id_creator }),
+        body: JSON.stringify({ url: url_content, type, id_creator, description }),
       });
 
       if (!response.ok) {
@@ -285,6 +285,25 @@ export const createNowFromUrl = async (url_content: string, type: string, id_cre
       },
       created_at: new Date().toISOString(),
     };
+    
+    // Create MediaItem for the feed
+    const feedItem: MediaItem = {
+      id: newNow.id.toString(),
+      mediaType: url_content.includes('.mp4') || url_content.includes('video') || url_content.toLowerCase().includes('video') ? 'video' : 'image',
+      contentType: 'challenge',
+      uri: url_content,
+      text: description || `[${type}] ${url_content}`,
+      author: {
+        id: user.id,
+        name: user.name,
+        avatarUri: user.avatarUri,
+      },
+      likes: 0,
+      comments: 0,
+    };
+    
+    // Add to dummy feed
+    addCreatedNowToFeed(feedItem);
     
     console.log('Simulated NOW creation from URL:', newNow);
     return new Promise(resolve => {
@@ -1089,6 +1108,15 @@ function generateDummyNows(count: number = 50): MediaItem[] {
 
 const ALL_NOWS: MediaItem[] = generateDummyNows(50);
 
+// Array to store user created NOWs at runtime
+const USER_CREATED_NOWS: MediaItem[] = [];
+
+// Helper function to add a created NOW to the feed
+export const addCreatedNowToFeed = (now: MediaItem) => {
+  USER_CREATED_NOWS.unshift(now); // Add to the beginning
+  console.log('Added NOW to dummy feed:', now);
+};
+
 // Generate NOWs with type information using coherent structure
 function generateDummyNowsRaw(count: number = 30): any[] {
   const nows: any[] = [];
@@ -1137,11 +1165,13 @@ function fetchFromDummyData(page: number, categories?: string[]): Promise<{ data
       const start = (page - 1) * PAGE_SIZE;
       const end = start + PAGE_SIZE;
       
-      let filteredNows = ALL_NOWS;
+      // Combine user created NOWs with dummy NOWs
+      let allNows = [...USER_CREATED_NOWS, ...ALL_NOWS];
+      let filteredNows = allNows;
       
       // Filter by categories if specified
       if (categories && categories.length > 0) {
-        filteredNows = ALL_NOWS.filter(now => {
+        filteredNows = allNows.filter(now => {
           const content = COHERENT_NOW_CONTENT.find(c => {
             // Encontrar el contenido correspondiente basado en el statement o tipo
             if (now.contentType === 'user-profile') {
