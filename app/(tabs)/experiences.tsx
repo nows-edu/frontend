@@ -1,5 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { Dimensions, Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Image, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import AmbassadorCTA from '@/components/Experiences/AmbassadorCTA';
 import UniversityCard from '@/components/Experiences/UniversityCard';
@@ -136,6 +136,7 @@ export default function ExperiencesScreen() {
 const styles = StyleSheet.create({  container: {
     flex: 1,
     backgroundColor: '#000',
+    paddingTop: Platform.OS === 'android' ? 80 : 60, // Reducido el padding
   },
   content: {
     flex: 1,
