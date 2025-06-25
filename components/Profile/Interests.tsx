@@ -20,12 +20,13 @@ export default function Interests(props: InterestsProps) {
     statusColor = '#7A9AEC',
     isEditable = true
   } = props;
-  const [interests, setInterests] = React.useState(items);
+  const [interests, setInterests] = React.useState<InterestItem[]>([]);
 
   React.useEffect(() => {
     if (isEditable) {
       loadInterests();
     } else {
+      // Para perfiles externos, usar solo los items de las props
       setInterests(items);
     }
   }, [isEditable, items]);
@@ -35,8 +36,11 @@ export default function Interests(props: InterestsProps) {
     React.useCallback(() => {
       if (isEditable) {
         loadInterests();
+      } else {
+        // Asegurar que los perfiles externos siempre usen los items de las props
+        setInterests(items);
       }
-    }, [isEditable])
+    }, [isEditable, items])
   );
 
   const loadInterests = async () => {

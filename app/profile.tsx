@@ -348,6 +348,7 @@ const ProfileScreen = () => {
         showsVerticalScrollIndicator={false}
       >
         <ProfileBanner
+          key={`external-banner-${userId}`}
           imageUri={userProfile.avatarUrl}
           statusText={userProfile.status}
           statusColor={userProfile.statusColor}
@@ -355,22 +356,26 @@ const ProfileScreen = () => {
         />
 
         <UserDisplay
+          key={`external-display-${userId}`}
           name={userProfile.name}
           username={userProfile.username}
         />
 
         <ProfileStats
+          key={`external-stats-${userId}`}
           following={followingCount}
           followers={followerCount}
           visits={visitCount}
         />
 
         <FollowButton
+          key={`external-follow-${userId}`}
           isFollowing={isFollowing}
           onToggleFollow={handleToggleFollow}
         />
 
         <ProfileInfo
+          key={`external-info-${userId}`}
           items={[
             { type: 'education', text: userProfile.education },
             { type: 'location', text: userProfile.location }
@@ -379,12 +384,14 @@ const ProfileScreen = () => {
         />
 
         <Interests
+          key={`external-interests-${userId}`}
           items={userProfile.interests}
           statusColor={userProfile.statusColor}
           isEditable={false}
         />
 
         <Career
+          key={`external-career-${userId}`}
           items={userProfile.career.map(item => ({
             year: item.year,
             achievement: item.achievement,

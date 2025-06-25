@@ -120,7 +120,7 @@ const ActionButtons = ({ likes, comments, showComments, onToggleComments }: Acti
 const BottomSection = ({ item }: { item: MediaItemType }) => {
   const navigateToProfile = () => {
     router.push({
-      pathname: '/(tabs)/profile',
+      pathname: '/profile',
       params: { userId: item.author.id }
     });
   };
