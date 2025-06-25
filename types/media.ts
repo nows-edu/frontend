@@ -16,6 +16,7 @@ export interface MediaItem {
   comments: number;
   challengeId?: string;
   challengeTitle?: string;
+  statement?: string; // Statement que aparece en el DynamicIsland
   // Datos específicos para user-profile
   profileData?: {
     education: string;
@@ -23,6 +24,9 @@ export interface MediaItem {
     interests: string[];
     status: string;
     statusColor?: string;
+    followers?: number;
+    following?: number;
+    visits?: number;
   };
 }
 

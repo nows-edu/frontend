@@ -30,14 +30,20 @@ function convertNowToMediaItem(now: NowItem): MediaItem {
 }
 
 // NOWs API functions
-export const fetchNows = async (page: number = 1, type?: string): Promise<{ data: MediaItem[], hasMore: boolean }> => {
-  console.log(`Fetching NOWs page ${page}... (Type: ${type || 'all'})`);
+export const fetchNows = async (page: number = 1, type?: string, categories?: string[]): Promise<{ data: MediaItem[], hasMore: boolean }> => {
+  console.log(`Fetching NOWs page ${page}... (Type: ${type || 'all'}, Categories: ${categories?.join(', ') || 'all'})`);
   
   if (USE_BACKEND) {
     try {
-      const url = type 
-        ? `${API_URL}/api/nows/feed?page=${page}&limit=${PAGE_SIZE}&type=${type}`
-        : `${API_URL}/api/nows/feed?page=${page}&limit=${PAGE_SIZE}`;
+      let url = `${API_URL}/api/nows/feed?page=${page}&limit=${PAGE_SIZE}`;
+      
+      if (type) {
+        url += `&type=${type}`;
+      }
+      
+      if (categories && categories.length > 0) {
+        url += `&categories=${categories.join(',')}`;
+      }
         
       const response = await fetch(url);
       
@@ -55,10 +61,10 @@ export const fetchNows = async (page: number = 1, type?: string): Promise<{ data
     } catch (error) {
       console.error('Backend fetch error:', error);
       // Fallback to dummy data on error
-      return fetchFromDummyData(page);
+      return fetchFromDummyData(page, categories);
     }
   } else {
-    return fetchFromDummyData(page);
+    return fetchFromDummyData(page, categories);
   }
 };
 
@@ -303,13 +309,13 @@ export const fetchCategories = async (): Promise<string[]> => {
       return await response.json();
     } catch (error) {
       console.error('Error fetching categories:', error);
-      return ['Retos', 'Opiniones', 'Usuarios', 'Clubes', 'Comunidades', 'Actividades'];
+      return ['Retos', 'Opiniones', 'Perfiles', 'Actividades', 'Comunidades', 'Clubes'];
     }
   } else {
-    // Dummy categories
+    // Dummy categories que coinciden con nuestro contenido
     return new Promise(resolve => {
       setTimeout(() => {
-        resolve(['Retos', 'Opiniones', 'Usuarios', 'Clubes', 'Comunidades', 'Actividades']);
+        resolve(['Retos', 'Opiniones', 'Perfiles', 'Actividades', 'Comunidades', 'Clubes']);
       }, 500);
     });
   }
@@ -325,13 +331,13 @@ export const fetchSelectedCategories = async (userId?: string): Promise<string[]
       return await response.json();
     } catch (error) {
       console.error('Error fetching user preferences:', error);
-      return ['Populares', 'Nuevos'];
+      return ['Retos', 'Opiniones', 'Perfiles', 'Estudio', 'Campus', 'Vida Universitaria'];
     }
   } else {
-    // Dummy selected categories
+    // Por defecto, todas las categorías están seleccionadas
     return new Promise(resolve => {
       setTimeout(() => {
-        resolve(['Populares', 'Nuevos']);
+        resolve(['Retos', 'Opiniones', 'Perfiles', 'Estudio', 'Campus', 'Vida Universitaria']);
       }, 300);
     });
   }
@@ -530,6 +536,205 @@ export const createPostFromUrl = async (uri: string, text: string, authorId: str
     return { success: true, post: newPost };
   }
 };
+
+// Contenido coherente y estructurado para NOWs con statements integrados
+const COHERENT_NOW_CONTENT = [
+  // --- RETOS COHERENTES ---
+  {
+    id: 1,
+    type: 'RETO',
+    mediaType: 'image',
+    categories: ['Retos', 'Estudio'],
+    // Imagen de un rincón acogedor de una biblioteca universitaria
+    mediaUrl: 'https://images.pexels.com/photos/207692/pexels-photo-207692.jpeg?auto=compress&cs=tinysrgb&w=1080&h=1920&dpr=1',
+    statement: 'Enseña el spot más infravalorado de tu biblioteca',
+    description: 'Muestra ese rincón secreto de la biblioteca donde la concentración es máxima. 🤫📚 #VidaEstudiantil #BibliotecaSecreta',
+    challenge: '¿Cuál es tu lugar favorito para estudiar en la biblioteca?',
+    context: 'Encontrar espacios únicos de estudio en el campus',
+    keywords: ['biblioteca', 'estudio', 'campus', 'secreto']
+  },
+  {
+    id: 2,
+    type: 'RETO',
+    mediaType: 'image',
+    categories: ['Retos', 'Estudio'],
+    // Imagen de un escritorio de estudiante bien organizado y con estilo
+    mediaUrl: 'https://images.pexels.com/photos/4050315/pexels-photo-4050315.jpeg?auto=compress&cs=tinysrgb&w=1080&h=1920&dpr=1',
+    statement: 'Enseña tu setup de estudio más aesthetic',
+    description: 'Un espacio de estudio que inspira a sacar dieces. ✨🌿 #AestheticDesk #StudyInspo',
+    challenge: '¿Cómo organizas tu espacio de estudio?',
+    context: 'Optimización del entorno de estudio personal',
+    keywords: ['setup', 'escritorio', 'aesthetic', 'organización']
+  },
+  {
+    id: 3,
+    type: 'RETO',
+    mediaType: 'image',
+    categories: ['Retos', 'Vida Universitaria'],
+    // Imagen de una bandeja de comida típica de cafetería universitaria
+    mediaUrl: 'https://images.pexels.com/photos/2641886/pexels-photo-2641886.jpeg?auto=compress&cs=tinysrgb&w=1080&h=1920&dpr=1',
+    statement: 'Muestra la comida más típica (o extraña) de tu cafetería',
+    description: 'El menú de hoy en la uni... un clásico que nunca falla. 🍽️😅 #ComidaUniversitaria #VidaDeEstudiante',
+    challenge: '¿Cuál es el plato estrella de tu universidad?',
+    context: 'Experiencias gastronómicas universitarias',
+    keywords: ['comida', 'universidad', 'cafetería', 'menú']
+  },
+  {
+    id: 4,
+    type: 'RETO',
+    mediaType: 'video',
+    categories: ['Retos', 'Vida Universitaria'],
+    // Vídeo corto de alguien preparando un desayuno rápido y sencillo
+    mediaUrl: 'https://videos.pexels.com/video-files/7662269/7662269-hd_1080_1920_30fps.mp4',
+    statement: 'Tu desayuno de estudiante en menos de 5 minutos',
+    description: '¡Energía para empezar el día! Mi desayuno pre-clase súper rápido. ⏰🥣 #DesayunoExpress #RecetasEstudiante',
+    challenge: '¿Cuál es tu desayuno ideal antes de clases?',
+    context: 'Rutinas matutinas de estudiantes universitarios',
+    keywords: ['desayuno', 'rutina', 'mañana', 'estudiante']
+  },
+
+  // --- OPINIONES COHERENTES ---
+  {
+    id: 5,
+    type: 'OPINIÓN',
+    mediaType: 'image',
+    categories: ['Opiniones', 'Campus'],
+    // Imagen de un aula universitaria con estudiantes
+    mediaUrl: 'https://images.pexels.com/photos/159775/library-la-trobe-university-student-study-159775.jpeg?auto=compress&cs=tinysrgb&w=1080&h=1920&dpr=1',
+    statement: '¿Qué opinas sobre las clases híbridas?',
+    description: 'Clases presenciales vs. online, ¿cuál es el futuro de la educación? 🤔💻 #DebateUni #EducacionHibrida',
+    challenge: '¿Son más efectivas las clases presenciales o virtuales?',
+    context: 'Evaluando modalidades de enseñanza universitaria',
+    keywords: ['clases', 'online', 'presencial', 'educación']
+  },
+  {
+    id: 6,
+    type: 'OPINIÓN',
+    mediaType: 'image',
+    categories: ['Opiniones', 'Campus'],
+    // Imagen de un campus universitario con zonas verdes
+    mediaUrl: 'https://images.pexels.com/photos/207691/pexels-photo-207691.jpeg?auto=compress&cs=tinysrgb&w=1080&h=1920&dpr=1',
+    statement: '¿Qué mejorarías de los espacios comunes de tu universidad?',
+    description: 'Si pudiera cambiar algo de mi campus, empezaría por aquí... 🌳💡 #MiCampus #MejorasUni',
+    challenge: '¿Qué cambiarías del campus de tu universidad?',
+    context: 'Propuestas de mejora para infraestructura universitaria',
+    keywords: ['campus', 'infraestructura', 'mejoras', 'espacios']
+  },
+  {
+    id: 7,
+    type: 'OPINIÓN',
+    mediaType: 'image',
+    categories: ['Opiniones', 'Estudio'],
+    // Imagen de estudiantes en una sala de exámenes
+    mediaUrl: 'https://images.pexels.com/photos/5940721/pexels-photo-5940721.jpeg?auto=compress&cs=tinysrgb&w=1080&h=1920&dpr=1',
+    statement: '¿Son justos los sistemas de evaluación actuales?',
+    description: '¿Exámenes finales o evaluación continua? Se abre el debate. 📝🔄 #Evaluación #Examenes',
+    challenge: '¿Son justos los métodos de evaluación actuales?',
+    context: 'Reforma de sistemas de evaluación académica',
+    keywords: ['exámenes', 'evaluación', 'sistema', 'educativo']
+  },
+
+  // --- PERFILES RECOMENDADOS (YA ERAN COHERENTES) ---
+  {
+    id: 8,
+    type: 'PERFIL_RECOMENDADO',
+    mediaType: 'profile',
+    categories: ['Perfiles'],
+    mediaUrl: 'https://i.pravatar.cc/150?img=1', // pravatar es ideal para perfiles dummy
+    statement: null,
+    description: '¡Conoce a Elena! 👋 Estudiante de Ingeniería Informática en la UAB 🎓',
+    challenge: null,
+    context: 'Perfil recomendado de estudiante',
+    profileData: {
+      name: 'Elena García',
+      username: 'elena_codes',
+      education: 'Ingeniería Informática - UAB',
+      location: 'Sant Cugat del Vallès',
+      interests: ['Programación', 'Gaming', 'Café'],
+      status: 'Coding Queen',
+      statusColor: 'rgb(168, 85, 247)',
+      followers: 234,
+      following: 189,
+      visits: 1456
+    },
+    keywords: ['perfil', 'estudiante', 'programación', 'UAB']
+  },
+  {
+    id: 9,
+    type: 'PERFIL_RECOMENDADO',
+    mediaType: 'profile',
+    categories: ['Perfiles'],
+    mediaUrl: 'https://i.pravatar.cc/150?img=3',
+    statement: null,
+    description: '¡Conoce a Sofia! ✨ Diseñadora en formación con un ojo artístico increíble 🎨',
+    challenge: null,
+    context: 'Perfil recomendado de estudiante',
+    profileData: {
+      name: 'Sofia Martín',
+      username: 'sofia_design',
+      education: 'Diseño Gráfico - ELISAVA',
+      location: 'Barcelona',
+      interests: ['Diseño', 'Arte', 'Fotografía'],
+      status: 'Creative Soul',
+      statusColor: 'rgb(251, 146, 60)',
+      followers: 891,
+      following: 445,
+      visits: 3678
+    },
+    keywords: ['perfil', 'diseño', 'arte', 'creatividad']
+  },
+  
+  // Añadir más contenido variado para el filtrado
+  {
+    id: 10,
+    type: 'RETO',
+    mediaType: 'image',
+    categories: ['Retos', 'Campus'],
+    mediaUrl: 'https://images.pexels.com/photos/1595391/pexels-photo-1595391.jpeg?auto=compress&cs=tinysrgb&w=1080&h=1920&dpr=1',
+    statement: 'Encuentra el rincón más instagrameable de tu universidad',
+    description: '📸 Aquí es donde todos quieren hacerse la foto de graduación #InstagrammableSpot #Campus',
+    challenge: '¿Cuál es el lugar más fotogénico de tu universidad?',
+    context: 'Espacios universitarios más populares en redes sociales',
+    keywords: ['campus', 'fotografía', 'instagram', 'viral']
+  },
+  {
+    id: 11,
+    type: 'OPINIÓN',
+    mediaType: 'image',
+    categories: ['Opiniones', 'Vida Universitaria'],
+    mediaUrl: 'https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=1080&h=1920&dpr=1',
+    statement: '¿Vale la pena estudiar un máster después de la carrera?',
+    description: 'Máster vs experiencia laboral... el dilema de nuestra generación 🎓💼 #MasterVsExperiencia #FuturoLaboral',
+    challenge: '¿Qué es más valioso: especialización académica o experiencia práctica?',
+    context: 'Decisiones de formación post-universitaria',
+    keywords: ['máster', 'carrera', 'formación', 'futuro']
+  },
+  {
+    id: 12,
+    type: 'PERFIL_RECOMENDADO',
+    mediaType: 'profile',
+    categories: ['Perfiles'],
+    mediaUrl: 'https://i.pravatar.cc/150?img=4',
+    statement: null,
+    description: '¡Conoce a Marc! 🚀 Emprendedor tech con ideas revolucionarias 💡',
+    challenge: null,
+    context: 'Perfil recomendado de estudiante emprendedor',
+    profileData: {
+      name: 'Marc Fernández',
+      username: 'marc_startup',
+      education: 'ADE + Ingeniería - UPC',
+      location: 'Barcelona Tech City',
+      interests: ['Startups', 'Tech', 'Innovación'],
+      status: 'Building the Future',
+      statusColor: 'rgb(34, 197, 94)',
+      followers: 567,
+      following: 298,
+      visits: 2134
+    },
+    keywords: ['perfil', 'emprendimiento', 'tecnología', 'startup']
+  }
+];
+
 
 // Dummy data fallback - Extensive realistic content for demo mode
 const CURRENT_DEMO_USER = { 
@@ -834,35 +1039,37 @@ const UNIVERSITY_MEDIA_URLS = {
   ]
 };
 
-// Generate comprehensive dummy data with university content
+// Generate comprehensive dummy data with university content using new coherent structure
 function generateDummyNows(count: number = 50): MediaItem[] {
   const nows: MediaItem[] = [];
-  const allContent = [...UNIVERSITY_CONTENT, ...USER_PROFILE_CONTENT];
   
   for (let i = 0; i < count; i++) {
     const user = DUMMY_USERS[Math.floor(Math.random() * DUMMY_USERS.length)];
-    const content = allContent[i % allContent.length];
+    const content = COHERENT_NOW_CONTENT[i % COHERENT_NOW_CONTENT.length];
     
-    // Reducir la probabilidad de videos - solo 20% serán videos
-    const shouldBeVideo = content.mediaType === 'video' && Math.random() < 0.2;
-    const finalMediaType = shouldBeVideo ? 'video' : 'image';
+    // Usar el mediaUrl específico de cada contenido
+    const uri = content.mediaUrl;
     
-    const uri = finalMediaType === 'video'
-      ? UNIVERSITY_MEDIA_URLS.videos[Math.floor(Math.random() * UNIVERSITY_MEDIA_URLS.videos.length)]
-      : UNIVERSITY_MEDIA_URLS.images[Math.floor(Math.random() * UNIVERSITY_MEDIA_URLS.images.length)];
-    
-    // Para user-profile, usar la foto de perfil del usuario
-    const profileUri = content.type === 'USER_PROFILE' ? user.avatarUri : uri;
+    // Determinar el tipo de contenido
+    let contentType: 'challenge' | 'opinion' | 'user-profile' = 'opinion';
+    if (content.type === 'RETO') contentType = 'challenge';
+    else if (content.type === 'PERFIL_RECOMENDADO') contentType = 'user-profile';
     
     const now: MediaItem = {
       id: (i + 1).toString(),
-      mediaType: finalMediaType as 'video' | 'image',
-      contentType: content.type === 'USER_PROFILE' ? 'user-profile' : (content.type === 'RETO' ? 'challenge' : 'opinion'),
-      uri: profileUri,
-      text: content.text,
-      challengeId: content.type === 'RETO' ? `challenge_${i}` : undefined,
-      challengeTitle: content.type !== 'USER_PROFILE' ? (content as any).challenge : undefined,
-      author: {
+      mediaType: content.mediaType === 'profile' ? 'image' : content.mediaType as 'video' | 'image',
+      contentType: contentType,
+      uri: uri,
+      text: content.description,
+      challengeId: content.type === 'RETO' ? `challenge_${content.id}` : undefined,
+      challengeTitle: content.challenge || undefined,
+      statement: content.statement || undefined, // Añadir el statement aquí
+      author: content.type === 'PERFIL_RECOMENDADO' && content.profileData ? {
+        id: `profile_${content.id}`,
+        name: content.profileData.name,
+        avatarUri: content.mediaUrl,
+        status: content.profileData.status,
+      } : {
         id: user.id,
         name: user.name,
         avatarUri: user.avatarUri,
@@ -870,14 +1077,8 @@ function generateDummyNows(count: number = 50): MediaItem[] {
       },
       likes: Math.floor(Math.random() * 10000) + 10,
       comments: Math.floor(Math.random() * 500) + 5,
-      // Añadir datos de perfil para user-profile
-      profileData: content.type === 'USER_PROFILE' ? {
-        education: (content as any).education,
-        location: (content as any).location,
-        interests: (content as any).interests,
-        status: (content as any).status,
-        statusColor: (content as any).statusColor,
-      } : undefined,
+      // Añadir datos de perfil para recomendaciones de perfil
+      profileData: content.type === 'PERFIL_RECOMENDADO' ? content.profileData : undefined,
     };
     
     nows.push(now);
@@ -888,22 +1089,22 @@ function generateDummyNows(count: number = 50): MediaItem[] {
 
 const ALL_NOWS: MediaItem[] = generateDummyNows(50);
 
-// Generate NOWs with type information
+// Generate NOWs with type information using coherent structure
 function generateDummyNowsRaw(count: number = 30): any[] {
   const nows: any[] = [];
   
   for (let i = 0; i < count; i++) {
     const user = DUMMY_USERS[Math.floor(Math.random() * DUMMY_USERS.length)];
-    const content = UNIVERSITY_CONTENT[i % UNIVERSITY_CONTENT.length];
+    const content = COHERENT_NOW_CONTENT[i % COHERENT_NOW_CONTENT.length];
     
-    const isVideo = content.mediaType === 'video';
-    const uri = isVideo 
-      ? UNIVERSITY_MEDIA_URLS.videos[Math.floor(Math.random() * UNIVERSITY_MEDIA_URLS.videos.length)]
-      : UNIVERSITY_MEDIA_URLS.images[Math.floor(Math.random() * UNIVERSITY_MEDIA_URLS.images.length)];
+    // Skip profile recommendations for raw NOWs
+    if (content.type === 'PERFIL_RECOMENDADO') {
+      continue;
+    }
     
     const now = {
       id: i + 1,
-      url_content: uri,
+      url_content: content.mediaUrl,
       type: content.type,
       positiveVotes: Math.floor(Math.random() * 5000) + 10,
       negativeVotes: Math.floor(Math.random() * 100),
@@ -917,6 +1118,8 @@ function generateDummyNowsRaw(count: number = 30): any[] {
       created_at: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
       challenge: content.challenge,
       context: content.context,
+      statement: content.statement,
+      description: content.description
     };
     
     now.totalVotes = now.positiveVotes + now.negativeVotes;
@@ -928,14 +1131,40 @@ function generateDummyNowsRaw(count: number = 30): any[] {
 
 const ALL_NOWS_RAW = generateDummyNowsRaw(30);
 
-function fetchFromDummyData(page: number): Promise<{ data: MediaItem[], hasMore: boolean }> {
+function fetchFromDummyData(page: number, categories?: string[]): Promise<{ data: MediaItem[], hasMore: boolean }> {
   return new Promise(resolve => {
     setTimeout(() => {
       const start = (page - 1) * PAGE_SIZE;
       const end = start + PAGE_SIZE;
       
-      const data = ALL_NOWS.slice(start, end);
-      const hasMore = end < ALL_NOWS.length;
+      let filteredNows = ALL_NOWS;
+      
+      // Filter by categories if specified
+      if (categories && categories.length > 0) {
+        filteredNows = ALL_NOWS.filter(now => {
+          const content = COHERENT_NOW_CONTENT.find(c => {
+            // Encontrar el contenido correspondiente basado en el statement o tipo
+            if (now.contentType === 'user-profile') {
+              return c.type === 'PERFIL_RECOMENDADO';
+            } else if (now.contentType === 'challenge') {
+              return c.type === 'RETO' && c.statement === now.statement;
+            } else if (now.contentType === 'opinion') {
+              return c.type === 'OPINIÓN' && c.statement === now.statement;
+            }
+            return false;
+          });
+          
+          // Si encontramos el contenido, verificar si alguna de sus categorías está en el filtro
+          if (content && content.categories) {
+            return content.categories.some(cat => categories.includes(cat));
+          }
+          
+          return false;
+        });
+      }
+      
+      const data = filteredNows.slice(start, end);
+      const hasMore = end < filteredNows.length;
 
       resolve({ data, hasMore });
     }, FAKE_MODE ? 300 : 1000); // Faster response in fake mode

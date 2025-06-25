@@ -59,7 +59,7 @@ export default function NowsFeed({ selectedCategories, onItemChange }: NowsFeedP
 
     try {
       console.log(`Fetching page ${pageToFetch} with categories: ${selectedCategories.join(', ')}`);
-      const { data, hasMore: newHasMore } = await api.fetchNows(pageToFetch);
+      const { data, hasMore: newHasMore } = await api.fetchNows(pageToFetch, undefined, selectedCategories);
       
       setNows(prev => (isInitialLoad ? data : [...prev, ...data]));
       setPage(pageToFetch + 1);

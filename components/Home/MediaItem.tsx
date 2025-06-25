@@ -51,7 +51,7 @@ interface ActionButtonsProps {
   onToggleComments: () => void;
 }
 
-// Action Buttons Component
+// Action Buttons Component for regular content
 const ActionButtons = ({ likes, comments, showComments, onToggleComments }: ActionButtonsProps) => {
   const [isLiked, setIsLiked] = React.useState(false);
   const [likesCount, setLikesCount] = React.useState(likes);
@@ -100,6 +100,33 @@ const ActionButtons = ({ likes, comments, showComments, onToggleComments }: Acti
         </Text>
       </TouchableOpacity>
       
+      <TouchableOpacity 
+        style={styles.actionButton}
+        onPress={handleShare}
+        activeOpacity={0.6}
+      >
+        <MaterialIcons 
+          name="reply" 
+          size={32} 
+          color={hasShared ? "#2B64F6" : "white"}
+          style={{ transform: [{ scaleX: -1 }] }}
+        />
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+// Share-only component for user profiles
+const ShareOnlyButton = () => {
+  const [hasShared, setHasShared] = React.useState(false);
+
+  const handleShare = () => {
+    setHasShared(true);
+    setTimeout(() => setHasShared(false), 2000);
+  };
+
+  return (
+    <View style={styles.actionButtons}>
       <TouchableOpacity 
         style={styles.actionButton}
         onPress={handleShare}
@@ -349,45 +376,38 @@ const MediaItem = ({ item, isVisible }: MediaItemProps) => {
       
       {/* Caption and controls overlay */}
       <View style={styles.mediaWrapper}>
-        <ActionButtons 
-          likes={item.likes} 
-          comments={item.comments}
-          showComments={showComments}
-          onToggleComments={handleToggleComments}
-        />
+        {/* Mostrar ActionButtons completos para contenido normal, ShareOnlyButton para perfiles */}
+        {item.contentType === 'user-profile' ? (
+          <ShareOnlyButton />
+        ) : (
+          <ActionButtons 
+            likes={item.likes} 
+            comments={item.comments}
+            showComments={showComments}
+            onToggleComments={handleToggleComments}
+          />
+        )}
         
         {item.text && (
           <Text style={styles.caption} numberOfLines={4}>
             {item.text}
           </Text>
         )}
-
-        {/* Información especial para perfiles de usuario */}
-        {item.contentType === 'user-profile' && item.profileData && (
-          <View style={styles.profileInfoOverlay}>
-            <Text style={styles.profileEducation}>{item.profileData.education}</Text>
-            <Text style={styles.profileLocation}>📍 {item.profileData.location}</Text>
-            <View style={styles.profileInterests}>
-              {item.profileData.interests.map((interest, index) => (
-                <View key={index} style={styles.interestTag}>
-                  <Text style={styles.interestText}>{interest}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
         
         <BottomSection item={item} />
 
-        <CommentsSection 
-          isVisible={showComments}
-          onClose={handleToggleComments}
-          postId={item.id}
-          comments={MOCK_COMMENTS.map(comment => ({
-            ...comment,
-            postId: item.id
-          }))}
-        />
+        {/* Solo mostrar CommentsSection si no es un perfil recomendado */}
+        {item.contentType !== 'user-profile' && (
+          <CommentsSection 
+            isVisible={showComments}
+            onClose={handleToggleComments}
+            postId={item.id}
+            comments={MOCK_COMMENTS.map(comment => ({
+              ...comment,
+              postId: item.id
+            }))}
+          />
+        )}
       </View>
     </View>
   );

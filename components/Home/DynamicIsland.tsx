@@ -5,11 +5,16 @@ import { Animated, Dimensions, StyleSheet, Text, TouchableOpacity, View } from '
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface DynamicIslandProps {
-  type: 'Reto' | 'Opinión';
+  type: 'Reto' | 'Opinión' | 'Usuario';
   statement: string;
+  profileData?: {
+    education?: string;
+    location?: string;
+    interests?: string[];
+  };
 }
 
-const DynamicIsland: React.FC<DynamicIslandProps> = ({ type, statement }) => {
+const DynamicIsland: React.FC<DynamicIslandProps> = ({ type, statement, profileData }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [userToggled, setUserToggled] = useState(false);
   const expandAnim = useRef(new Animated.Value(1)).current;
@@ -118,7 +123,11 @@ const DynamicIsland: React.FC<DynamicIslandProps> = ({ type, statement }) => {
           ]}>
             <View style={styles.typeContainer}>
               <MaterialIcons 
-                name={type === 'Reto' ? 'mic' : 'flash-on'} 
+                name={
+                  type === 'Reto' ? 'mic' : 
+                  type === 'Opinión' ? 'mic' : 
+                  'person'
+                } 
                 size={isExpanded ? 18 : 22} 
                 color="white" 
               />
@@ -132,18 +141,39 @@ const DynamicIsland: React.FC<DynamicIslandProps> = ({ type, statement }) => {
           </View>
 
           {isExpanded && (
-            <Animated.Text 
-              style={[
-                styles.statement,
-                {
-                  opacity: expandAnim,
-                }
-              ]}
-              numberOfLines={3}
-              adjustsFontSizeToFit={false}
+            <Animated.View
+              style={{
+                opacity: expandAnim,
+              }}
             >
-              {statement}
-            </Animated.Text>
+              {type === 'Usuario' && profileData ? (
+                <View style={styles.profileContent}>
+                  {profileData.education && (
+                    <Text style={styles.profileEducation}>{profileData.education}</Text>
+                  )}
+                  {profileData.location && (
+                    <Text style={styles.profileLocation}>📍 {profileData.location}</Text>
+                  )}
+                  {profileData.interests && profileData.interests.length > 0 && (
+                    <View style={styles.profileInterests}>
+                      {profileData.interests.map((interest, index) => (
+                        <View key={index} style={styles.interestTag}>
+                          <Text style={styles.interestText}>{interest}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                </View>
+              ) : (
+                <Text 
+                  style={styles.statement}
+                  numberOfLines={3}
+                  adjustsFontSizeToFit={false}
+                >
+                  {statement}
+                </Text>
+              )}
+            </Animated.View>
           )}
         </Animated.View>
       </TouchableOpacity>
@@ -206,6 +236,47 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     flexWrap: 'wrap',
     width: '100%',
+    textShadowColor: 'rgba(0,0,0,0.75)',
+    textShadowOffset: { width: 0.5, height: 0.5 },
+    textShadowRadius: 2,
+  },
+  profileContent: {
+    marginTop: 8,
+  },
+  profileEducation: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 4,
+    textShadowColor: 'rgba(0,0,0,0.75)',
+    textShadowOffset: { width: 0.5, height: 0.5 },
+    textShadowRadius: 2,
+  },
+  profileLocation: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 12,
+    marginBottom: 6,
+    textShadowColor: 'rgba(0,0,0,0.75)',
+    textShadowOffset: { width: 0.5, height: 0.5 },
+    textShadowRadius: 2,
+  },
+  profileInterests: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 4,
+  },
+  interestTag: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
+  },
+  interestText: {
+    color: 'white',
+    fontSize: 11,
+    fontWeight: '500',
     textShadowColor: 'rgba(0,0,0,0.75)',
     textShadowOffset: { width: 0.5, height: 0.5 },
     textShadowRadius: 2,
